@@ -23,9 +23,24 @@ TiketApi.echo = function(html) {
 function TicketForm(id) {
 	this.id = id;
 	this.init = 0;
+
+	this.vType = [];
 }
 
 TicketForm.prototype.getHtml = function() {
+	var html = '',
+		vehicle = new Vehicle(),
+		select = this.getSelectHTML(
+			vehicle.kinds,
+			{class : 'TFTypes', deep: vehicle.deep});
+
+	html = '<div id="TF'+this.id+'" class="TF">'+
+		'<div>From<input type="text" class="TFFrom"></div>'+
+		'<div>To<input type="text" class="TFTo"></div>'+
+		'<div>By</div>'+
+		'<div>'+select+'</div>'+
+		'<div><div class="TFButton TOff"></div></div>'+
+		'</div>';
 
 	return html;
 }
@@ -36,17 +51,6 @@ TicketForm.prototype.init = function() {
 	return this;
 }
 
-TicketForm.prototype.onChange = function(event) {
-	var $this = event.currentTarget;
-}
-
-TicketForm.prototype.check = function() {
-	var field = this.get;
-
-	while (true) {
-		this.get()
-	}
-}
 
 TicketForm.prototype.switch = function(state) {
 	if ( state == 'on') {
@@ -55,6 +59,70 @@ TicketForm.prototype.switch = function(state) {
 		// turn off
 	}
 }
+
+TicketForm.prototype.onChange = function(event) {
+	var $this = DCC(event.currentTarget),
+		deep = $this.attr('deep'),
+		val = $this.val();
+	this.vType[deep] = val;
+	this.vType = this.vType.slice(0, deep + 1);
+
+	this.updateTypes();
+}
+
+TicketForm.prototype.updateTypes = function() {
+	var formHTML = DCC('.TF'+this.id),
+		types = formHTML.find('.TFTypes');
+
+	var vehicle = 'Vehicle';
+	types.forEach(function(val, ind, types) {
+		if (val.attr('deep') > this.vType[this.vType.length-1]) {
+			val.rm();
+		} else {
+			val.val(this.vType[ind]).off('change', this.onChange);
+			vehicle =+ this.vType[ind];
+		}
+	});
+
+	vehicle = Object.create(vehicle);
+	if (!vehicle.hasKinds()) {
+		if (vehicle.val() != '') {
+			this.active();
+		} else {
+			this.deactive();
+		}
+	} else {
+		formHTML.append(this.getSelectHTML(
+			vehicle.kinds,
+			{class : 'TFTypes', deep: vehicle.deep}
+		));
+	
+	}
+
+	formHTML.find('.TFTypes').on('change', this.onChange);
+}
+
+
+TiketForm.prototype.getSelectHTML(options, params){
+	var html = '';
+
+	html = '<select '
+	for (var key in params) {
+		html =+ key+'="'+params[key]+'" ';
+	}
+	html += '>';
+
+	options.forEach(function(val, ind, options){
+		html += '<option value="'+val+'">'+val+'</option>'; 
+	});
+	html += '</select>';
+
+	return html;
+}
+
+// TicketForm.prototype.check = function() {}
+// TicketForm.prototype.printOptions = function() { }
+
 // -------------------------------------------------------- 
 // Tiket Class
 function Ticket(id) {
@@ -68,7 +136,7 @@ function Ticket(id) {
 // Vehicles class
 function Vehicle() {
 	this.type = 'Vehicle';
-	this.kinds = [];
+	this.kinds = ['Bus', 'Airplane', 'Train'];
 
 	this.deep = 0;
 
