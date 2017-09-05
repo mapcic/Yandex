@@ -92,28 +92,28 @@
     }
 
     DCC.prototype.next = function() {
-    	this.node = [];
+    	this.nodes = [];
         for (var i = 0; i < this.length; i++) {
-            this.node = this.node.concat(this[i].nextSibling);
+            this.nodes = this.nodes.concat(this[i].nextElementSibling);
 		}
 
-		this.lenght = this.node.length;
+		this.length = this.nodes.length;
         for (var i = 0; i < this.length; i++) {
-            this[i] = this.node[i];
+            this[i] = this.nodes[i];
         }
 
     	return this;
     }
 
     DCC.prototype.previous = function() {
-    	this.node = [];
+    	this.nodes = [];
         for (var i = 0; i < this.length; i++) {
-            this.node = this.node.concat(this[i].previousSibling);
+            this.nodes = this.nodes.concat(this[i].previousElementSibling);
 		}
 
-		this.lenght = this.node.length;
+		this.length = this.nodes.length;
         for (var i = 0; i < this.length; i++) {
-            this[i] = this.node[i];
+            this[i] = this.nodes[i];
         }
 
     	return this;
@@ -149,15 +149,15 @@
     }
 
     DCC.prototype.find = function(selector) {
-    	this.node = [];
+    	this.nodes = [];
         for (var i = 0; i < this.length; i++) {
-            this.node = this.node.concat(this.node.slice.call(this[i].querySelectorAll(selector)));
+            this.nodes = this.nodes.concat(this.nodes.slice.call(this[i].querySelectorAll(selector)));
             delete this[i];
 		}
 
-		this.lenght = this.node.length;
+		this.length = this.nodes.length;
         for (var i = 0; i < this.length; i++) {
-            this[i] = this.node[i];
+            this[i] = this.nodes[i];
         }
 
     	return this;
