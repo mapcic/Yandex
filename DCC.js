@@ -103,6 +103,30 @@
     	});
     }
 
+    DCC.prototype.val = function( val ) {
+    	if (typeof val !== 'undefined') {
+    		return this.each(function(){
+    			this.value = val;
+    		});
+    	} else {
+    		return this.each(function(){
+    			this = this.options[this.selectedIndex].value;
+    		});
+    	}
+    }
+
+    DCC.prototype.attr = function(attr, val) {
+    	if (typeof val !== 'undefined') {
+    		return this.each(function(){
+    			this.setAttribute(attr, val);
+    		});
+    	} else {
+    		return this.each(function(){
+    			this = this.getAttribute(attr);
+    		});
+    	}
+    }
+
     window.DCC = DCC;
 
 })(window);
