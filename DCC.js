@@ -77,14 +77,31 @@
         });
     }
 
-    // DCC.prototype.text = function(str) {
-    //     if (str) {
-    //         return this.each(function() {
-    //             this.innerText = str;
-    //         });
-    //     }
-    //     return this.length && this[0].innerText;
-    // };
+    DCC.prototype.append = function(html) {
+    	var node = createNode(html);
+    	return this.each(function(){
+    		this.appendChild(node);
+    	})
+    }
+
+    DCC.prototype.remove = function(html) {
+    	this.each(function(){
+    		this.remove();
+    	});
+    	return this;
+    }
+
+    DCC.prototype.next = function(elem) {
+    	return this.each(function() {
+    		this = this.nextSibling();
+    	});
+    }
+
+    DCC.prototype.previous = function(elem) {
+    	return this.each(function() {
+    		this = this.previousSibling();
+    	});
+    }
 
     window.DCC = DCC;
 
