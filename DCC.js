@@ -91,16 +91,32 @@
     	return this;
     }
 
-    DCC.prototype.next = function(elem) {
-    	return this.each(function() {
-    		this = this.nextSibling();
-    	});
+    DCC.prototype.next = function() {
+    	this.node = [];
+        for (var i = 0; i < this.length; i++) {
+            this.node = this.node.concat(this[i].nextSibling);
+		}
+
+		this.lenght = this.node.length;
+        for (var i = 0; i < this.length; i++) {
+            this[i] = this.node[i];
+        }
+
+    	return this;
     }
 
-    DCC.prototype.previous = function(elem) {
-    	return this.each(function() {
-    		this = this.previousSibling();
-    	});
+    DCC.prototype.previous = function() {
+    	this.node = [];
+        for (var i = 0; i < this.length; i++) {
+            this.node = this.node.concat(this[i].previousSibling);
+		}
+
+		this.lenght = this.node.length;
+        for (var i = 0; i < this.length; i++) {
+            this[i] = this.node[i];
+        }
+
+    	return this;
     }
 
     DCC.prototype.val = function( val ) {
@@ -109,9 +125,12 @@
     			this.value = val;
     		});
     	} else {
-    		return this.each(function(){
-    			this = this.options[this.selectedIndex].value;
+    		var values = [];
+    		this.each(function(){
+    			values = values.concat(this.options[this.selectedIndex].value);
     		});
+
+    		return values;
     	}
     }
 
@@ -121,20 +140,27 @@
     			this.setAttribute(attr, val);
     		});
     	} else {
-    		return this.each(function(){
-    			this = this.getAttribute(attr);
+    		var values = [];
+    		this.each(function(){
+    			values = values.concat(this.getAttribute(attr));
     		});
+    		return values;
     	}
     }
 
     DCC.prototype.find = function(selector) {
-    	var elems = [];
+    	this.node = [];
+        for (var i = 0; i < this.length; i++) {
+            this.node = this.node.concat(this.node.slice.call(this[i].querySelectorAll(selector)));
+            delete this[i];
+		}
 
-    	this.each(function(){
-    		elems = elems.concat(this.querySelectorAll(selector));
-    	});
+		this.lenght = this.node.length;
+        for (var i = 0; i < this.length; i++) {
+            this[i] = this.node[i];
+        }
 
-    	return new DCC(elems);
+    	return this;
     }
 
     window.DCC = DCC;
