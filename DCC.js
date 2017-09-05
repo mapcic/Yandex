@@ -127,6 +127,16 @@
     	}
     }
 
+    DCC.prototype.find = function(selector) {
+    	var elems = [];
+
+    	this.each(function(){
+    		elems = elems.concat(this.querySelectorAll(selector));
+    	});
+
+    	return new DCC(elems);
+    }
+
     window.DCC = DCC;
 
 })(window);
