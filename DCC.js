@@ -66,7 +66,7 @@
     }
 
     DCC.prototype.on = function(name, handler) {
-        return this.off(name, handler).this.each(function() {
+        return this.off(name, handler).each(function() {
             this.addEventListener(name, handler, false);
         });
     };
