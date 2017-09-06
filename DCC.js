@@ -9,8 +9,12 @@
         this.length = 0;
         this.nodes = [];
 
-        if (selector instanceof HTMLElement || selector instanceof NodeList) {
-            this.nodes = selector.length > 1 ? [].slice.call(selector) : [selector];
+        if (selector instanceof HTMLElement || selector instanceof NodeList || (selector instanceof Array && selector.every(checkType))) {
+            if ( selector instanceof HTMLSelectElement ){
+                this.nodes = [selector];
+            } else {
+                this.nodes = selector.length > 1 || selector instanceof Array ? [].slice.call(selector) : [selector];
+            }
         } else if (typeof selector === 'string') {
             if (selector[0] === '<' && selector[selector.length - 1] === ">") {
                 this.nodes = [createNode(selector)];
@@ -33,6 +37,10 @@
         div.innerHTML = html;
         
         return div.firstChild;
+    }
+
+    function checkType(elem) {
+        return (elem instanceof HTMLElement || elem instanceof NodeList);
     }
 
     DCC.prototype.each = function(callback) {
@@ -79,7 +87,7 @@
 
     DCC.prototype.trigger = function(name) {
         return this.each(function() {
-            this.dispatchEvent(name);
+            this.dispatchEvent(new Event(name));
         });        
     }
 
@@ -98,31 +106,25 @@
     }
 
     DCC.prototype.next = function() {
-    	this.nodes = [];
+        var nodes = [];
         for (var i = 0; i < this.length; i++) {
-            this.nodes = this.nodes.concat(this[i].nextElementSibling);
-		}
-
-		this.length = this.nodes.length;
-        for (var i = 0; i < this.length; i++) {
-            this[i] = this.nodes[i];
+            if (this[i].nextElementSibling instanceof HTMLElement){
+                nodes = nodes.concat(this[i].nextElementSibling);
+            }
         }
 
-    	return this;
+        return new DCC(nodes);
     }
 
     DCC.prototype.previous = function() {
-    	this.nodes = [];
+    	var nodes = [];
         for (var i = 0; i < this.length; i++) {
-            this.nodes = this.nodes.concat(this[i].previousElementSibling);
+            if (this[i].nextElementSibling instanceof HTMLElement){
+                nodes = nodes.concat(this[i].previousElementSibling);
+            }
 		}
 
-		this.length = this.nodes.length;
-        for (var i = 0; i < this.length; i++) {
-            this[i] = this.nodes[i];
-        }
-
-    	return this;
+    	return new DCC(nodes);
     }
 
     DCC.prototype.val = function( val ) {
@@ -155,18 +157,12 @@
     }
 
     DCC.prototype.find = function(selector) {
-    	this.nodes = [];
+    	var nodes = [];
         for (var i = 0; i < this.length; i++) {
-            this.nodes = this.nodes.concat(this.nodes.slice.call(this[i].querySelectorAll(selector)));
-            delete this[i];
+            nodes = nodes.concat(nodes.slice.call(this[i].querySelectorAll(selector)));
 		}
 
-		this.length = this.nodes.length;
-        for (var i = 0; i < this.length; i++) {
-            this[i] = this.nodes[i];
-        }
-
-    	return this;
+    	return new DCC(nodes);
     }
 
     window.DCC = DCC;

@@ -52,14 +52,15 @@ TicketForm.prototype.render = function() {
 }
 
 TicketForm.prototype.init = function() {
-	this.isInit = 1;
+	var context = this,
+		select = DCC('#TF'+this.id+' select');
 
-	var context = this;	
-	DCC(DCC('#TF'+this.id+' select').on('change', function(event) {
+	DCC(select.find('option')[1]).attr('selected', '');
+	select.on('change', function(event) {
 		context.onChange(event);
-	}).find('option')[0]).attr('selected', '');
-	// DCC('#TF'+this.id+' select').trigger('change');
+	}).trigger('change');
 
+	this.isInit = 1;
 	return this;
 }
 
@@ -75,13 +76,12 @@ TicketForm.prototype.switch = function(state) {
 }
 
 TicketForm.prototype.onChange = function(event) {
-	var $this = event.currentTarget,
-		deep = $this.getAttribute('deep'),
-		val = $this.options[$this.selectedIndex].value;
+	var $this = DCC(event.currentTarget);
+		deep = $this.attr('deep'),
+		val = $this.val();
+		console.log($this);
 	this.vType[+deep] = val;
 	this.vType = this.vType.slice(0, deep + 1);
-
-	console.log(val);
 
 	// this.updateTypes();
 }
