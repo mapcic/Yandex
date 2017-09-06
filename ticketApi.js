@@ -36,13 +36,12 @@ TicketForm.prototype.render = function() {
 		vehicle = new Vehicle(),
 		select = this.getSelectHTML(
 			vehicle.kinds,
-			{class : 'TFTypes', deep: vehicle.deep});
+			{class : 'TFType', deep: vehicle.deep});
 
 	html = '<div id="TF'+this.id+'" class="TF">'+
-		'<div>From<input type="text" class="TFFrom"></div>'+
-		'<div>To<input type="text" class="TFTo"></div>'+
-		'<div>By</div>'+
-		'<div>'+select+'</div>'+
+		'<div>From<input type="text" class="TFFrom">'+
+		'To<input type="text" class="TFTo"></div>'+
+		'<div class="TFTypes"><span>By</span>'+select+'</div>'+
 		'<div><div class="TFButton TOff">Добавить билет</div></div>'+
 		'</div>';
 
@@ -55,15 +54,14 @@ TicketForm.prototype.init = function() {
 	var context = this,
 		select = DCC('#TF'+this.id+' select');
 
-	DCC(select.find('option')[1]).attr('selected', '');
+	DCC(select.find('option')[0]).attr('selected', '');
 	select.on('change', function(event) {
 		context.onChange(event);
-	}).trigger('change');
+	});
 
 	this.isInit = 1;
 	return this;
 }
-
 
 TicketForm.prototype.switch = function(state) {
 	if ( state == 'on') {
@@ -76,46 +74,53 @@ TicketForm.prototype.switch = function(state) {
 }
 
 TicketForm.prototype.onChange = function(event) {
-	var $this = DCC(event.currentTarget);
+	var $this = DCC(event.currentTarget),
 		deep = $this.attr('deep'),
 		val = $this.val();
-		console.log($this);
-	this.vType[+deep] = val;
+
+	this.switch('off');
+	this.vType[+deep] = val[0];
 	this.vType = this.vType.slice(0, deep + 1);
 
-	// this.updateTypes();
+	this.updateTypes();
 }
 
 TicketForm.prototype.updateTypes = function() {
-	var formHTML = DCC('.TF'+this.id),
-		types = formHTML.find('.TFTypes');
+	var formHTML = DCC('#TF'+this.id),
+		typesWrap = formHTML.find('.TFTypes'),
+		types = formHTML.find('.TFType');
 
-	var vehicle = 'Vehicle';
-	types.forEach(function(val, ind, types) {
-		if (val.attr('deep') > this.vType[this.vType.length-1]) {
-			val.rm();
+	var vehicle = 'Vehicle',
+		context = this;
+	types.each(function() {
+		var $this = DCC(this),
+			ind = +$this.attr('deep');
+		if ($this.attr('deep') > context.vType.length-1) {
+			$this.remove();
 		} else {
-			val.val(this.vType[ind]).off('change', this.onChange);
-			vehicle =+ this.vType[ind];
+			$this.val(context.vType[ind]);
+			vehicle += context.vType[ind];
 		}
 	});
 
-	vehicle = Object.create(vehicle);
-	if (!vehicle.hasKinds()) {
-		if (vehicle.val() != '') {
-			this.active();
-		} else {
-			this.deactive();
-		}
-	} else {
-		formHTML.append(this.getSelectHTML(
-			vehicle.kinds,
-			{class : 'TFTypes', deep: vehicle.deep}
-		));
-	
+	if (DCC(types[context.vType.length-1]).val()[0] == ''){
+		return;
 	}
 
-	formHTML.find('.TFTypes').on('change', this.onChange);
+	vehicle = new window[vehicle];
+	if (vehicle.hasKinds()) {
+		typesWrap.append(this.getSelectHTML(
+			vehicle.kinds,
+			{class : 'TFType', deep: vehicle.deep}
+		));
+		var types = formHTML.find('.TFType');
+		// DCC(types[types.length-1]).on('change', context.onChange);
+		DCC(types[types.length-1]).on('change', function(event){
+			context.onChange(event);
+		});
+	} else {
+		this.switch('on');
+	}
 }
 
 
@@ -126,7 +131,8 @@ TicketForm.prototype.getSelectHTML = function(options, params) {
 	for (var key in params) {
 		html += ' '+key+'="'+params[key]+'"';
 	}
-	html += '>';
+	// html += '>';
+	html += '><option value="">Type...</option>';
 
 	options.forEach(function(val, ind, options){
 		html += '<option value="'+val+'">'+val+'</option>'; 
@@ -173,11 +179,11 @@ Vehicle.prototype.hasKinds = function() {
 function VehicleBus() {
 	Vehicle.apply(this, arguments);
 
-	this.kinds = ['Airexpess', 'Trip'];
+	this.kinds = ['Airexpess', 'Regular'];
 	this.type = 'Bus';
 	this.deep++;
 }
-VehicleBus.prototype =  new Vehicle();
+VehicleBus.prototype = Object.create(Vehicle.prototype);
 
 function VehicleBusAirexpess() {
 	VehicleBus.apply(this, arguments);
@@ -186,54 +192,72 @@ function VehicleBusAirexpess() {
 	this.type = 'Airexpess';
 	this.deep++;
 }
-VehicleBusAirexpess.prototype =  new VehicleBus();
+VehicleBusAirexpess.prototype = Object.create(VehicleBus.prototype);
 
-function VehicleBusTrip() {
+function VehicleBusRegular() {
 	VehicleBus.apply(this, arguments);
 
 	this.kinds = [];
-	this.type = 'Trip';
+	this.type = 'Regular';
 	this.deep++;
 }
-VehicleBusTrip.prototype =  new VehicleBus();
+VehicleBusRegular.prototype =  Object.create(VehicleBus.prototype);
 
 // Airplane tree
 function VehicleAirplane() {
 	Vehicle.apply(this, arguments);
 
-	this.kinds = ['Trip'];
+	this.kinds = ['Regular'];
 	this.type = 'Airplane'
 	this.deep++;
 }
-VehicleAirplane.prototype =  new Vehicle();
+VehicleAirplane.prototype =  Object.create(Vehicle.prototype);
 
-function VehicleAirplaneTrip() {
+function VehicleAirplaneRegular() {
 	VehicleAirplane.apply(this, arguments);
 
 	this.kinds = [];
-	this.type = 'Trip';
+	this.type = 'Regular';
 	this.deep++;
 }
-VehicleAirplaneTrip.prototype =  new VehicleAirplane();
+VehicleAirplaneRegular.prototype =  Object.create(VehicleAirplane.prototype);
 
 // Train tree
 function VehicleTrain() {
 	Vehicle.apply(this, arguments);
 
-	this.kinds = ['Airexpess', 'Trip'];
+	this.kinds = ['Airexpess', 'Regular'];
 	this.type = 'Train'
 	this.deep++;
 }
-VehicleTrain.prototype =  new Vehicle();
+VehicleTrain.prototype =  Object.create(Vehicle.prototype);
 
-function VehicleTrainTrip() {
+function VehicleTrainRegular() {
 	VehicleTrain.apply(this, arguments);
 
-	this.kinds = [];
-	this.type = 'Trip';
+	this.kinds = ['Comfort', 'Usually'];
+	this.type = 'Regular';
 	this.deep++;
 }
-VehicleTrainTrip.prototype =  new VehicleTrain();
+VehicleTrainRegular.prototype =  Object.create(VehicleTrain.prototype);
+
+function VehicleTrainRegularComfort() {
+	VehicleTrainRegular.apply(this, arguments);
+
+	this.kinds = [];
+	this.type = 'Comfort';
+	this.deep++;
+}
+VehicleTrainRegularComfort.prototype =  Object.create(VehicleTrainRegular.prototype);
+
+function VehicleTrainRegularUsually() {
+	VehicleTrainRegular.apply(this, arguments);
+
+	this.kinds = [];
+	this.type = 'Usually';
+	this.deep++;
+}
+VehicleTrainRegularUsually.prototype =  Object.create(VehicleTrainRegular.prototype);
 
 function VehicleTrainAirexpess() {
 	VehicleTrain.apply(this, arguments);
@@ -242,13 +266,4 @@ function VehicleTrainAirexpess() {
 	this.type = 'Airexpess';
 	this.deep++;
 }
-VehicleTrainAirexpess.prototype =  new VehicleTrain();
-
-function VehicleTrainTrip() {
-	VehicleTrain.apply(this, arguments);
-
-	this.kinds = [];
-	this.type = 'Trip';
-	this.deep++;
-}
-VehicleTrainTrip.prototype =  new VehicleTrain();
+VehicleTrainAirexpess.prototype =  Object.create(VehicleTrain.prototype);
