@@ -27,7 +27,7 @@ function TicketForm(id) {
 	this.vType = [];
 }
 
-TicketForm.prototype.getHtml = function() {
+TicketForm.prototype.printForm = function() {
 	var html = '',
 		vehicle = new Vehicle(),
 		select = this.getSelectHTML(
@@ -42,7 +42,9 @@ TicketForm.prototype.getHtml = function() {
 		'<div><div class="TFButton TOff"></div></div>'+
 		'</div>';
 
-	return html;
+	DCC('body').append(html);
+
+	return this;
 }
 
 TicketForm.prototype.init = function() {
@@ -61,9 +63,9 @@ TicketForm.prototype.switch = function(state) {
 }
 
 TicketForm.prototype.onChange = function(event) {
-	var $this = DCC(event.currentTarget),
-		deep = $this.attr('deep'),
-		val = $this.val();
+	var $this = event.currentTarget,
+		deep = $this.getAttribute('deep'),
+		val = $this.options[$this.selectedIndex].value;
 	this.vType[deep] = val;
 	this.vType = this.vType.slice(0, deep + 1);
 
