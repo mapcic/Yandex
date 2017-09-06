@@ -77,6 +77,12 @@
         });
     }
 
+    DCC.prototype.trigger = function(name) {
+        return this.each(function() {
+            this.dispatchEvent(name);
+        });        
+    }
+
     DCC.prototype.append = function(html) {
     	var node = createNode(html);
     	return this.each(function(){

@@ -14,20 +14,24 @@ TicketApi.newTID = function() {
 	return this.TDI++;
 }
 
-TiketApi.echo = function(html) {
-	// echo var hrtm. It's may be DCC
+TicketApi.initApi = function() {
+	var form = this.getForm();
+
+	form.render().init();
+
+	return form;
 }
 
 // -------------------------------------------------------- 
-// Class to figure tiket
+// Class to figure Ticket
 function TicketForm(id) {
 	this.id = id;
-	this.init = 0;
+	this.isInit = 0;
 
 	this.vType = [];
 }
 
-TicketForm.prototype.printForm = function() {
+TicketForm.prototype.render = function() {
 	var html = '',
 		vehicle = new Vehicle(),
 		select = this.getSelectHTML(
@@ -39,7 +43,7 @@ TicketForm.prototype.printForm = function() {
 		'<div>To<input type="text" class="TFTo"></div>'+
 		'<div>By</div>'+
 		'<div>'+select+'</div>'+
-		'<div><div class="TFButton TOff"></div></div>'+
+		'<div><div class="TFButton TOff">Добавить билет</div></div>'+
 		'</div>';
 
 	DCC('body').append(html);
@@ -48,7 +52,13 @@ TicketForm.prototype.printForm = function() {
 }
 
 TicketForm.prototype.init = function() {
-	this.init = 1;
+	this.isInit = 1;
+
+	var context = this;	
+	DCC(DCC('#TF'+this.id+' select').on('change', function(event) {
+		context.onChange(event);
+	}).find('option')[0]).attr('selected', '');
+	// DCC('#TF'+this.id+' select').trigger('change');
 
 	return this;
 }
@@ -56,20 +66,24 @@ TicketForm.prototype.init = function() {
 
 TicketForm.prototype.switch = function(state) {
 	if ( state == 'on') {
-		// turn on
+		DCC('#TF'+this.id+' .TFButton').removeClass('TOff');
 	} else {
-		// turn off
+		DCC('#TF'+this.id+' .TFButton').addClass('TOff');
 	}
+
+	return this;
 }
 
 TicketForm.prototype.onChange = function(event) {
 	var $this = event.currentTarget,
 		deep = $this.getAttribute('deep'),
 		val = $this.options[$this.selectedIndex].value;
-	this.vType[deep] = val;
+	this.vType[+deep] = val;
 	this.vType = this.vType.slice(0, deep + 1);
 
-	this.updateTypes();
+	console.log(val);
+
+	// this.updateTypes();
 }
 
 TicketForm.prototype.updateTypes = function() {
@@ -105,12 +119,12 @@ TicketForm.prototype.updateTypes = function() {
 }
 
 
-TiketForm.prototype.getSelectHTML(options, params){
+TicketForm.prototype.getSelectHTML = function(options, params) {
 	var html = '';
 
-	html = '<select '
+	html = '<select'
 	for (var key in params) {
-		html =+ key+'="'+params[key]+'" ';
+		html += ' '+key+'="'+params[key]+'"';
 	}
 	html += '>';
 
@@ -126,7 +140,7 @@ TiketForm.prototype.getSelectHTML(options, params){
 // TicketForm.prototype.printOptions = function() { }
 
 // -------------------------------------------------------- 
-// Tiket Class
+// Ticket Class
 function Ticket(id) {
 	this.id = id;
 
