@@ -127,6 +127,18 @@
     	return new DCC(nodes);
     }
 
+    DCC.prototype.getChilds = function() {
+        var nodes = [];
+        for (var i = 0; i < this.length; i++) {
+            var childs = this[i].children;
+            if (childs !== undefined){
+                nodes = nodes.concat([].slice.call(childs));
+            }
+        }
+
+        return new DCC(nodes);
+    }
+
     DCC.prototype.val = function( val ) {
     	if (typeof val !== 'undefined') {
     		return this.each(function(){

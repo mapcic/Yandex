@@ -39,14 +39,14 @@ TicketForm.prototype.render = function() {
 			{class : 'TFType', deep: vehicle.deep});
 
 	html = '<div id="TF'+this.id+'" class="TF">'+
-		'<div>From<input type="text" class="TFFrom">'+
+		'<div class="TFWay">From<input type="text" class="TFFrom">'+
 		'To<input type="text" class="TFTo"></div>'+
 		'<div class="TFTypes"><span>By</span>'+select+'</div>'+
-		'<div><div class="TFButton TOff">Добавить билет</div></div>'+
+		'<div class="TFOptions"></div>'+
+		'<div class="TFButton TOff">Добавить билет</div>'+
 		'</div>';
 
 	DCC('body').append(html);
-
 	return this;
 }
 
@@ -79,6 +79,7 @@ TicketForm.prototype.onChange = function(event) {
 		val = $this.val();
 
 	this.switch('off');
+	this.hideOptions();
 	this.vType[+deep] = val[0];
 	this.vType = this.vType.slice(0, deep + 1);
 
@@ -119,10 +120,10 @@ TicketForm.prototype.updateTypes = function() {
 			context.onChange(event);
 		});
 	} else {
+		this.showOptions();
 		this.switch('on');
 	}
 }
-
 
 TicketForm.prototype.getSelectHTML = function(options, params) {
 	var html = '';
@@ -143,7 +144,25 @@ TicketForm.prototype.getSelectHTML = function(options, params) {
 }
 
 // TicketForm.prototype.check = function() {}
-// TicketForm.prototype.printOptions = function() { }
+TicketForm.prototype.showOptions = function() {
+	var formHTML = DCC('#TF'+this.id),
+		optionsWrap = formHTML.find('.TFOptions'),
+		className = 'Vehicle'+this.vType.join(''),
+		vehicle = new window[className],
+		options = vehicle.options;
+	
+	for (var i = 0; i < options.length; i++) {
+		console.log(i);
+		console.log(options[i]);
+		var html = '<div>'+options[i].charAt(0).toUpperCase() + options[i].slice(1)+':<input type="text" class="TFOption" name="'+options[i]+'">';
+		optionsWrap.append(html)+'</div>';
+	}
+}
+
+TicketForm.prototype.hideOptions = function() {
+	DCC('#TF'+this.id+' .TFOptions').getChilds().remove();
+	return this;
+}
 
 // -------------------------------------------------------- 
 // Ticket Class
@@ -165,10 +184,7 @@ function Vehicle() {
 	this.from = '';
 	this.to = '';
 
-	this.seat = '';
-	this.baggage = '';
-
-	this.options = [];
+	this.options = []
 }
 
 Vehicle.prototype.hasKinds = function() {
@@ -182,6 +198,10 @@ function VehicleBus() {
 	this.kinds = ['Airexpess', 'Regular'];
 	this.type = 'Bus';
 	this.deep++;
+
+	this.options = this.options.concat([
+		'seat', 'baggage'
+	]);
 }
 VehicleBus.prototype = Object.create(Vehicle.prototype);
 
@@ -210,6 +230,10 @@ function VehicleAirplane() {
 	this.kinds = ['Regular'];
 	this.type = 'Airplane'
 	this.deep++;
+
+	this.options = this.options.concat([
+		'seat', 'baggage', 'gate'
+	]);
 }
 VehicleAirplane.prototype =  Object.create(Vehicle.prototype);
 
@@ -226,9 +250,13 @@ VehicleAirplaneRegular.prototype =  Object.create(VehicleAirplane.prototype);
 function VehicleTrain() {
 	Vehicle.apply(this, arguments);
 
-	this.kinds = ['Airexpess', 'Regular'];
+	this.kinds = ['Airexpess', 'Regular', 'Longdistance'];
 	this.type = 'Train'
 	this.deep++;
+
+	this.options = this.options.concat([
+		'seat'
+	]);
 }
 VehicleTrain.prototype =  Object.create(Vehicle.prototype);
 
@@ -267,3 +295,16 @@ function VehicleTrainAirexpess() {
 	this.deep++;
 }
 VehicleTrainAirexpess.prototype =  Object.create(VehicleTrain.prototype);
+
+function VehicleTrainLongdistance() {
+	VehicleTrain.apply(this, arguments);
+
+	this.kinds = [];
+	this.type = 'Longdistance';
+	this.deep++;
+
+	this.options = this.options.concat([
+		'wagon', 'class'
+	]);
+}
+VehicleTrainLongdistance.prototype =  Object.create(VehicleTrain.prototype);
