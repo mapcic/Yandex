@@ -37,6 +37,7 @@ function TicketForm(id, tickets) {
 	this.to = 'TFTo'+this.id;
 	this.types = 'TFTypes'+this.id;
 	this.options = 'TFOptions'+this.id;
+	this.button = 'TFButton'+this.id;
 
 	this.vType = [];
 }
@@ -62,61 +63,66 @@ TicketForm.prototype.render = function() {
 	this.to = document.getElementById(this.to);
 	this.types = document.getElementById(this.types);
 	this.options = document.getElementById(this.options);
+	this.button = document.getElementById(this.button);
 
 	return this;
 }
 
 TicketForm.prototype.init = function() {
-	var context = this,
-		select = DCC('#TF'+this.id+' select');
+	var $this = this,
+		select = DCC($this.form).find('select');
 
 	DCC(select.find('option')[0]).attr('selected', '');
 	select.on('change', function(event) {
-		context.onChange(event);
+		$this.onChange(event);
 	});
 
 	this.isInit = 1;
 	return this;
 }
 
-TicketForm.prototype.switch = function(state) {
-	if ( state == 'on') {
-		DCC('#TF'+this.id+' .TFButton').removeClass('TOff');
-	} else {
-		DCC('#TF'+this.id+' .TFButton').addClass('TOff');
-	}
+TicketForm.prototype.on = function() {
+	DCC(this.button).removeClass('TOff');
 
 	return this;
 }
+
+TicketForm.prototype.off = function() {
+	DCC(this.button).addClass('TOff');
+
+	return this;
+}
+
 
 TicketForm.prototype.onChange = function(event) {
 	var $this = DCC(event.currentTarget),
 		deep = $this.attr('deep'),
 		val = $this.val();
 
-	this.switch('off');
+	this.off();
 	this.hideOptions();
 	this.vType[+deep] = val[0];
-	this.vType = this.vType.slice(0, deep + 1);
+	this.vType = this.vType.slice(0, +deep + 1);
 
 	this.updateTypes();
 }
 
 TicketForm.prototype.updateTypes = function() {
-	var formHTML = DCC('#TF'+this.id),
-		typesWrap = formHTML.find('.TFTypes'),
-		types = formHTML.find('.TFType');
+	var formHTML = DCC(this.form),
+		typesWrap = DCC(this.types),
+		types = typesWrap.find('.TFType');
 
 	var vehicle = 'Vehicle',
 		context = this;
 	types.each(function() {
 		var $this = DCC(this),
 			ind = +$this.attr('deep');
-		if ($this.attr('deep') > context.vType.length-1) {
-			$this.remove();
-		} else {
+
+		if ($this.attr('deep') < context.vType.length) {
 			$this.val(context.vType[ind]);
 			vehicle += context.vType[ind];
+		} else {
+			$this.remove();
 		}
 	});
 
@@ -137,7 +143,7 @@ TicketForm.prototype.updateTypes = function() {
 		});
 	} else {
 		this.showOptions();
-		this.switch('on');
+		this.on();
 	}
 }
 
@@ -161,27 +167,35 @@ TicketForm.prototype.getSelectHTML = function(options, params) {
 
 // TicketForm.prototype.check = function() {}
 TicketForm.prototype.showOptions = function() {
-	var formHTML = DCC('#TF'+this.id),
-		optionsWrap = formHTML.find('.TFOptions'),
+	var formHTML = DCC(this.form),
+		optionsWrap = DCC(this.options),
 		className = 'Vehicle'+this.vType.join(''),
 		vehicle = new window[className],
 		options = vehicle.options;
 	
 	for (var i = 0; i < options.length; i++) {
-		console.log(i);
-		console.log(options[i]);
-		var html = '<div>'+options[i].charAt(0).toUpperCase() + options[i].slice(1)+':<input type="text" class="TFOption" name="'+options[i]+'">';
-		optionsWrap.append(html)+'</div>';
+		var html = '<div>'+options[i].charAt(0).toUpperCase() + options[i].slice(1)+':<input type="text" class="TFOption" name="'+options[i]+'"></div>';
+		optionsWrap.append(html);
 	}
 }
 
 TicketForm.prototype.hideOptions = function() {
-	DCC('#TF'+this.id+' .TFOptions').getChilds().remove();
+	DCC(this.options).getChilds().remove();
 	return this;
 }
 
 TicketForm.prototype.createTicket = function() {
+	var vehicle = 'Vehicle'+this.vType.join(''),
+		params = {
+			from : DCC(this.from).val(),
+			to : DCC(this.to).val()
+		},
+		options = (new window[vehicle]).options;
 
+	DCC(this.options).find('input').each(function() {
+		var $this = DCC(this);
+		params[$this.attr('name')] = $this.val();
+	});
 }
 
 // -------------------------------------------------------- 
@@ -210,7 +224,7 @@ Tickets.prototype.append = function(ticket) {
 	return this;
 }
 
-function Ticket(way, vehicle, options, next, previous) {
+function Ticket(vehicle, options, next, previous) {
 	// this.way = way;
 	this.vehicle = vehicle;
 	this.options = options;
