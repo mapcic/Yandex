@@ -199,7 +199,13 @@
     	} else {
     		var values = [];
     		this.each(function(){
-    			values = values.concat(this.options[this.selectedIndex].value);
+                if (this instanceof HTMLSelectElement) {
+        			values = values.concat(this.options[this.selectedIndex].value);
+                }
+
+                if (this instanceof HTMLInputElement) {
+                    values = values.concat(this.value);
+                }
     		});
 
     		return values;
