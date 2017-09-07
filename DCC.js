@@ -208,7 +208,7 @@
                 }
     		});
 
-    		return values;
+    		return (values.length > 1)? values : values[0];
     	}
     }
 
