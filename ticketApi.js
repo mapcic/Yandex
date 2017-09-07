@@ -52,7 +52,7 @@ TicketForm.prototype.render = function() {
 		way = '<div class="TFWay">'+from+to+'</div>',
 		types = '<div id="'+this.types+'" class="TFTypes"><span>By</span>'+select+'</div>',
 		options = '<div id="'+this.options+'" class="TFOptions"></div>',
-		button = '<div id="'+this.button+'" class="TFButton TOff">Добавить билет</div>',
+		button = '<button id="'+this.button+'" class="TFButton TOff">Добавить билет</button>',
 		form = '<div id="'+this.form+'" class="TF">'+
 			way + types + options + button + '</div>';
 
@@ -77,6 +77,10 @@ TicketForm.prototype.init = function() {
 		$this.onChange(event);
 	});
 
+	DCC(this.button).on('click', function(event){
+		$this.newTicket(event);
+	})
+
 	this.isInit = 1;
 	return this;
 }
@@ -93,7 +97,6 @@ TicketForm.prototype.off = function() {
 	return this;
 }
 
-
 TicketForm.prototype.onChange = function(event) {
 	var $this = DCC(event.currentTarget),
 		deep = $this.attr('deep'),
@@ -101,7 +104,7 @@ TicketForm.prototype.onChange = function(event) {
 
 	this.off();
 	this.hideOptions();
-	this.vType[+deep] = val[0];
+	this.vType[+deep] = val;
 	this.vType = this.vType.slice(0, +deep + 1);
 
 	this.updateTypes();
@@ -126,7 +129,7 @@ TicketForm.prototype.updateTypes = function() {
 		}
 	});
 
-	if (DCC(types[context.vType.length-1]).val()[0] == ''){
+	if (DCC(types[context.vType.length-1]).val() == ''){
 		return;
 	}
 
@@ -137,7 +140,6 @@ TicketForm.prototype.updateTypes = function() {
 			{class : 'TFType', deep: vehicle.deep}
 		));
 		var types = formHTML.find('.TFType');
-		// DCC(types[types.length-1]).on('change', context.onChange);
 		DCC(types[types.length-1]).on('change', function(event){
 			context.onChange(event);
 		});
@@ -165,7 +167,6 @@ TicketForm.prototype.getSelectHTML = function(options, params) {
 	return html;
 }
 
-// TicketForm.prototype.check = function() {}
 TicketForm.prototype.showOptions = function() {
 	var formHTML = DCC(this.form),
 		optionsWrap = DCC(this.options),
@@ -184,38 +185,54 @@ TicketForm.prototype.hideOptions = function() {
 	return this;
 }
 
-TicketForm.prototype.createTicket = function() {
+TicketForm.prototype.newTicket = function(event) {
 	var vehicle = 'Vehicle'+this.vType.join(''),
 		params = {
 			from : DCC(this.from).val(),
 			to : DCC(this.to).val()
-		},
-		options = (new window[vehicle]).options;
+		};
 
 	DCC(this.options).find('input').each(function() {
 		var $this = DCC(this);
 		params[$this.attr('name')] = $this.val();
 	});
+
+	for (var key in params) {
+		if (params[key] == '' || params == undefined) {
+			return this;
+		}
+	}
+
+	this.tickets.append(new Ticket(vehicle, params));
+
+	return this;
 }
 
 // -------------------------------------------------------- 
 // Tickets Class
 function Tickets(id) {
 	this.id = id;
+
+	this.tickets = 'Ts'+this.id;
+	this.button = 'TsB'+this.id;
 }
 
 Tickets.prototype.render = function() {
 	var title = '<div class="TsTitle">Unsort tickets:</div>',
-		tickets = '<div id="Ts'+this.id+'"></div>';
+		button = '<button id="'+this.button+'">Sort it.</button>',
+		tickets = '<div id="'+this.tickets+'"></div>';
 	DCC('body').append(
 		'<div class="TsWrap">'+title+tickets+'</div>'
 	);
+
+	this.tickets = document.getElementById(this.tickets);
+	this.button = document.getElementById(this.button);
 
 	return this;
 }
 
 Tickets.prototype.append = function(ticket) {
-	var tickets = DCC('#Ts'+this.id);
+	var tickets = DCC(this.tickets);
 
 	if (ticket instanceof Ticket){
 		tickets.append(ticket.getHtml());
