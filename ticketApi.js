@@ -32,25 +32,37 @@ function TicketForm(id, tickets) {
 	this.tickets = tickets;
 	this.isInit = 0;
 
+	this.form = 'TF'+this.id;
+	this.from = 'TFFrom'+this.id;
+	this.to = 'TFTo'+this.id;
+	this.types = 'TFTypes'+this.id;
+	this.options = 'TFOptions'+this.id;
+
 	this.vType = [];
 }
 
 TicketForm.prototype.render = function() {
-	var html = '',
-		vehicle = new Vehicle(),
+	var	vehicle = new Vehicle(),
 		select = this.getSelectHTML(
 			vehicle.kinds,
-			{class : 'TFType', deep: vehicle.deep});
+			{class : 'TFType', deep: vehicle.deep}),
+		from = 'From:<input type="text" id="'+this.from+'" class="TFFrom">',
+		to = 'To:<input type="text" id="'+this.to+'" class="TFTo">',
+		way = '<div class="TFWay">'+from+to+'</div>',
+		types = '<div id="'+this.types+'" class="TFTypes"><span>By</span>'+select+'</div>',
+		options = '<div id="'+this.options+'" class="TFOptions"></div>',
+		button = '<div id="'+this.button+'" class="TFButton TOff">Добавить билет</div>',
+		form = '<div id="'+this.form+'" class="TF">'+
+			way + types + options + button + '</div>';
 
-	html = '<div id="TF'+this.id+'" class="TF">'+
-		'<div class="TFWay">From<input type="text" class="TFFrom">'+
-		'To<input type="text" class="TFTo"></div>'+
-		'<div class="TFTypes"><span>By</span>'+select+'</div>'+
-		'<div class="TFOptions"></div>'+
-		'<div class="TFButton TOff">Добавить билет</div>'+
-		'</div>';
+	DCC('body').append(form);
 
-	DCC('body').append(html);
+	this.form = document.getElementById(this.form);
+	this.from = document.getElementById(this.from);
+	this.to = document.getElementById(this.to);
+	this.types = document.getElementById(this.types);
+	this.options = document.getElementById(this.options);
+
 	return this;
 }
 
@@ -168,7 +180,9 @@ TicketForm.prototype.hideOptions = function() {
 	return this;
 }
 
-// Ticket.prototype.
+TicketForm.prototype.createTicket = function() {
+
+}
 
 // -------------------------------------------------------- 
 // Tickets Class
@@ -177,7 +191,7 @@ function Tickets(id) {
 }
 
 Tickets.prototype.render = function() {
-	var title = '<div class="TsTitle">Unsort tickets</div>',
+	var title = '<div class="TsTitle">Unsort tickets:</div>',
 		tickets = '<div id="Ts'+this.id+'"></div>';
 	DCC('body').append(
 		'<div class="TsWrap">'+title+tickets+'</div>'
@@ -205,7 +219,7 @@ function Ticket(way, vehicle, options, next, previous) {
 	this.previous = (previous instanceof Ticket)? previous : undefined;
 }
 
-Ticket.prototype.getHtml() {
+Ticket.prototype.getHtml = function() {
 	var way = '<div class="way">'+
 			'<div class="from" val="'+this.options.from+'">FROM:'+this.options.from+'</div>'+
 			'<div class="to" val="'+this.options.to+'">TO:'+this.options.to+'</div>'+
