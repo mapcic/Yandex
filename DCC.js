@@ -139,6 +139,58 @@
         return new DCC(nodes);
     }
 
+    DCC.prototype.firstChild = function(){
+        var nodes = [];
+        this.each(function(){
+            if (this instanceof HTMLElement){
+                nodes = nodes.concat([this.firstElementChild]);
+            } else if (this instanceof NodeList) {
+                nodes = nodes.concat([this.firstChild])
+            }
+        });
+
+        return new DCC(nodes);
+    }
+
+    DCC.prototype.lastChild = function(){
+        var nodes = [];
+        this.each(function(){
+            if (this instanceof HTMLElement){
+                nodes = nodes.concat([this.lastElementChild]);
+            } else if (this instanceof NodeList) {
+                nodes = nodes.concat([this.lastChild])
+            }
+        });
+
+        return new DCC(nodes);
+    }
+
+    DCC.prototype.parent = function(){
+        var nodes = [];
+        this.each(function(){
+            if (this instanceof HTMLElement){
+                nodes = nodes.concat([this.parentElement]);
+            } else if (this instanceof NodeList) {
+                nodes = nodes.concat([this.parentNode])
+            }
+        });
+
+        return new DCC(nodes);
+    }
+
+    DCC.prototype.insertBefore = function(elem) {
+        return this.each(function(){
+            // console.log(DCC(this).parent()[0].insertBefore(createNode(elem), this));
+            DCC(this).parent()[0].insertBefore(createNode(elem), this);
+        });
+    }
+
+    DCC.prototype.insertAfter = function(elem) {
+        return this.each(function() {
+            DCC(this).parent()[0].insertBefore(createNode(elem), DCC(this).next()[0])
+        })
+    }
+
     DCC.prototype.val = function( val ) {
     	if (typeof val !== 'undefined') {
     		return this.each(function(){
