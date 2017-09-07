@@ -5,8 +5,8 @@
 function TicketApi() {}
 
 TicketApi.TFID = 0;
-TicketApi.getForm = function() {
-	return new TicketForm(this.TFID++);
+TicketApi.getForm = function(tickets) {
+	return new TicketForm(this.TFID++, tickets);
 }
 
 TicketApi.TID = 0;
@@ -14,18 +14,22 @@ TicketApi.newTID = function() {
 	return this.TDI++;
 }
 
+TicketApi.TsID = 0;
 TicketApi.initApi = function() {
-	var form = this.getForm();
+	var tickets = new Tickets(this.TsID++),
+		form = this.getForm(tickets);
 
 	form.render().init();
+	tickets.render();
 
 	return form;
 }
 
 // -------------------------------------------------------- 
 // Class to figure Ticket
-function TicketForm(id) {
+function TicketForm(id, tickets) {
 	this.id = id;
+	this.tickets = tickets;
 	this.isInit = 0;
 
 	this.vType = [];
@@ -164,27 +168,71 @@ TicketForm.prototype.hideOptions = function() {
 	return this;
 }
 
-// -------------------------------------------------------- 
-// Ticket Class
-function Ticket(id) {
-	this.id = id;
+// Ticket.prototype.
 
-	this.from = '';
-	this.to = '';
+// -------------------------------------------------------- 
+// Tickets Class
+function Tickets(id) {
+	this.id = id;
+}
+
+Tickets.prototype.render = function() {
+	var title = '<div class="TsTitle">Unsort tickets</div>',
+		tickets = '<div id="Ts'+this.id+'"></div>';
+	DCC('body').append(
+		'<div class="TsWrap">'+title+tickets+'</div>'
+	);
+
+	return this;
+}
+
+Tickets.prototype.append = function(ticket) {
+	var tickets = DCC('#Ts'+this.id);
+
+	if (ticket instanceof Ticket){
+		tickets.append(ticket.getHtml());
+	}
+
+	return this;
+}
+
+function Ticket(way, vehicle, options, next, previous) {
+	// this.way = way;
+	this.vehicle = vehicle;
+	this.options = options;
+
+	this.next = (next instanceof Ticket)? next : undefined;
+	this.previous = (previous instanceof Ticket)? previous : undefined;
+}
+
+Ticket.prototype.getHtml() {
+	var way = '<div class="way">'+
+			'<div class="from" val="'+this.options.from+'">FROM:'+this.options.from+'</div>'+
+			'<div class="to" val="'+this.options.to+'">TO:'+this.options.to+'</div>'+
+			'</div>',
+		options = '<div class="options" vehicle="'+this.vehicle+'">';
+
+	for (var key in this.options) {
+		var val = this.options[key];
+		options += '<div class="options '+key+'" name="'+key+'" val="'+val+'">'+key+':'+val+'</div>';
+	}
+	options += '</div>';
+
+	return '<div class="TW">'+way+options+'</div>';
 }
 
 // -------------------------------------------------------- 
 // Vehicles class
-function Vehicle() {
+function Vehicle(params) {
 	this.type = 'Vehicle';
 	this.kinds = ['Bus', 'Airplane', 'Train'];
 
 	this.deep = 0;
 
-	this.from = '';
-	this.to = '';
+	this.way = ['from', 'to'];
+	this.options = [];
 
-	this.options = []
+	this.params = (params instanceof Object)? params: {};
 }
 
 Vehicle.prototype.hasKinds = function() {
@@ -192,7 +240,7 @@ Vehicle.prototype.hasKinds = function() {
 }
 
 // Bus tree
-function VehicleBus() {
+function VehicleBus(params) {
 	Vehicle.apply(this, arguments);
 
 	this.kinds = ['Airexpess', 'Regular'];
@@ -205,7 +253,7 @@ function VehicleBus() {
 }
 VehicleBus.prototype = Object.create(Vehicle.prototype);
 
-function VehicleBusAirexpess() {
+function VehicleBusAirexpess(params) {
 	VehicleBus.apply(this, arguments);
 
 	this.kinds = [];
@@ -214,7 +262,7 @@ function VehicleBusAirexpess() {
 }
 VehicleBusAirexpess.prototype = Object.create(VehicleBus.prototype);
 
-function VehicleBusRegular() {
+function VehicleBusRegular(params) {
 	VehicleBus.apply(this, arguments);
 
 	this.kinds = [];
@@ -224,7 +272,7 @@ function VehicleBusRegular() {
 VehicleBusRegular.prototype =  Object.create(VehicleBus.prototype);
 
 // Airplane tree
-function VehicleAirplane() {
+function VehicleAirplane(params) {
 	Vehicle.apply(this, arguments);
 
 	this.kinds = ['Regular'];
@@ -237,7 +285,7 @@ function VehicleAirplane() {
 }
 VehicleAirplane.prototype =  Object.create(Vehicle.prototype);
 
-function VehicleAirplaneRegular() {
+function VehicleAirplaneRegular(params) {
 	VehicleAirplane.apply(this, arguments);
 
 	this.kinds = [];
@@ -247,7 +295,7 @@ function VehicleAirplaneRegular() {
 VehicleAirplaneRegular.prototype =  Object.create(VehicleAirplane.prototype);
 
 // Train tree
-function VehicleTrain() {
+function VehicleTrain(params) {
 	Vehicle.apply(this, arguments);
 
 	this.kinds = ['Airexpess', 'Regular', 'Longdistance'];
@@ -260,7 +308,7 @@ function VehicleTrain() {
 }
 VehicleTrain.prototype =  Object.create(Vehicle.prototype);
 
-function VehicleTrainRegular() {
+function VehicleTrainRegular(params) {
 	VehicleTrain.apply(this, arguments);
 
 	this.kinds = ['Comfort', 'Usually'];
@@ -269,7 +317,7 @@ function VehicleTrainRegular() {
 }
 VehicleTrainRegular.prototype =  Object.create(VehicleTrain.prototype);
 
-function VehicleTrainRegularComfort() {
+function VehicleTrainRegularComfort(params) {
 	VehicleTrainRegular.apply(this, arguments);
 
 	this.kinds = [];
@@ -278,7 +326,7 @@ function VehicleTrainRegularComfort() {
 }
 VehicleTrainRegularComfort.prototype =  Object.create(VehicleTrainRegular.prototype);
 
-function VehicleTrainRegularUsually() {
+function VehicleTrainRegularUsually(params) {
 	VehicleTrainRegular.apply(this, arguments);
 
 	this.kinds = [];
@@ -287,7 +335,7 @@ function VehicleTrainRegularUsually() {
 }
 VehicleTrainRegularUsually.prototype =  Object.create(VehicleTrainRegular.prototype);
 
-function VehicleTrainAirexpess() {
+function VehicleTrainAirexpess(params) {
 	VehicleTrain.apply(this, arguments);
 
 	this.kinds = [];
@@ -296,7 +344,7 @@ function VehicleTrainAirexpess() {
 }
 VehicleTrainAirexpess.prototype =  Object.create(VehicleTrain.prototype);
 
-function VehicleTrainLongdistance() {
+function VehicleTrainLongdistance(params) {
 	VehicleTrain.apply(this, arguments);
 
 	this.kinds = [];
