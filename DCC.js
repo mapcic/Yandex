@@ -92,7 +92,7 @@
     }
 
     DCC.prototype.append = function(html) {
-    	var node = createNode(html);
+    	var node = html instanceof HTMLElement? html : createNode(html);
     	return this.each(function(){
     		this.appendChild(node);
     	})
@@ -233,6 +233,18 @@
 		}
 
     	return new DCC(nodes);
+    }
+
+    DCC.prototype.copy = function(r) {
+        var nodes = [];
+
+        r = r == undefined? false: r;
+
+        this.each(function(){
+            nodes = nodes.concat(this.cloneNode(r));
+        });
+
+        return new DCC(nodes);
     }
 
     window.DCC = DCC;
