@@ -1,20 +1,109 @@
 // How document
 
+function TicketsSortApi(tickets) {
+	this.tickets = (tickets instanceof Tickets)? tickets : TicketApi.TicketsFromHtml(TicketApi.TsID-1);
+	this.api = 'TSA';
+	this.bD = 'TSABD'
+	this.bS = 'TSABS'
+	this.sorted = 'TSAS';
+}
+
+TicketsSortApi.prototype.render = function() {
+	var title = '<div class="TSATitle">Sort tickets</div>',
+		bS = '<button id="'+this.bS+'">Get sort tickets</button>',
+		bD = '<button id="'+this.bD+'">Get description</button>',
+		sorted = '<div id="TSAS"></div>';
+	DCC('#'+this.api).remove();
+	DCC('body').append('<div id="'+this.api+'">'+ title + bS + bD + sorted +'</div>');
+
+	return this;
+}
+
+TicketsSortApi.prototype.init = function() {
+	this.api = document.getElementById(this.api);
+	this.bS = document.getElementById(this.bS);
+	this.bD = document.getElementById(this.bD);
+	this.sorted = document.getElementById(this.sorted);
+
+	var $this = this;
+	DCC(this.bS).on('click', function(event) {
+		$this.sortDOM(event)
+	});
+
+	return this;
+}
+
+TicketsSortApi.prototype.newSortedList = function() {
+	var html = '<div class="TSAS"></div>';
+
+	DCC(this.sorted).append(html);
+
+	return this;
+}
+
+TicketsSortApi.prototype.sortDOM = function() {
+	var tickets = DCC(this.tickets.tickets),
+		child = tickets.firstChild(),
+		next = child.next(),
+		list = DCC(this.newSortedList().sorted).lastChild();
+
+	if (child[0] == undefined) {
+		return this;
+	}
+
+	list.append(child.copy(true)[0]);
+	child.addClass('TSASorted').addClass('TOff');
+
+	var flag = true,
+		wasAdd = false,
+		i = 0;
+	while (flag) {
+		var next = child.next();
+
+		if (!child.hasClass('TSASorted')) {
+			var fs = list.firstChild(),
+				ls = list.lastChild(),
+				fromSort = fs.find('.from').attr('val'),
+				toSort = ls.find('.to').attr('val'),
+				from = child.find('.from').attr('val'),
+				to = child.find('.to').attr('val');
+
+			if (toSort == from && !child.hasClass('TSASorted')) {
+				ls.insertAfter(child.copy(true)[0]);
+				child.addClass('TSASorted').addClass('TOff');
+				wasAdd = true;
+			}
+
+			if (fromSort == to && !child.hasClass('TSASorted')) {
+				fs.insertBefore(child.copy(true)[0]);
+				child.addClass('TSASorted').addClass('TOff');
+				wasAdd = true;
+			}
+		}
+		if (next[0] == undefined) {
+			if (wasAdd) {
+				child = tickets.firstChild();
+				wasAdd = false;
+			} else {
+				flag = false;
+			}
+		} else {
+			child = next;
+		}
+		i++;
+	}
+	return this;
+}
+
 // -------------------------------------------------------- 
 // Control ticket
 function TicketApi() {}
 
 TicketApi.TFID = 0;
-TicketApi.getForm = function(tickets) {
-	return new TicketForm(this.TFID++, tickets);
-}
-
-TicketApi.TID = 0;
-TicketApi.newTID = function() {
-	return this.TDI++;
-}
-
+TicketApi.TFIDName="TF"
 TicketApi.TsID = 0;
+TicketApi.TsIDName="Ts"
+
 TicketApi.init = function() {
 	var tickets = new Tickets(this.TsID++),
 		form = this.getForm(tickets);
@@ -23,6 +112,18 @@ TicketApi.init = function() {
 	tickets.render().init();
 
 	return form;
+}
+
+TicketApi.getForm = function(tickets) {
+	return new TicketForm(this.TFID++, tickets);
+}
+
+TicketApi.TicketsFromHtml = function(id) {
+	var tickets = new Tickets(id);
+
+	tickets.init();
+
+	return tickets;
 }
 
 // -------------------------------------------------------- 
@@ -223,11 +324,17 @@ function Tickets(id) {
 }
 
 Tickets.prototype.init = function() {
-	var bs = DCC(this.button),
-		$this = this;
-	bs.on('click', function(event){
-		$this.sortHTML(event);
-	});
+	this.tickets = document.getElementById(this.tickets);
+	this.button = document.getElementById(this.button);
+	// this.sorted = document.getElementById(this.sorted);
+	// this.buttonDesc = document.getElementById(this.buttonDesc);
+	// this.desc = document.getElementById(this.desc);
+
+	// var bs = DCC(this.button),
+	// 	$this = this;
+	// bs.on('click', function(event){
+	// 	$this.sortHTML(event);
+	// });
 }
 
 Tickets.prototype.render = function() {
@@ -238,26 +345,18 @@ Tickets.prototype.render = function() {
 		'<div class="TsWrap">'+title+button+tickets+'</div>'
 	);
 
-	this.tickets = document.getElementById(this.tickets);
-	this.button = document.getElementById(this.button);
+	// title = '<div class="TsTitle">Sorted tickets:</div>';
+	// button = '<button id="'+this.buttonDesc+'">Get description.</button>';
+	// tickets = '<div id="'+this.sorted+'"></div>';
+	// DCC('body').append(
+	// 	'<div class="TsWrap">'+title+button+tickets+'</div>'
+	// );
 
-	title = '<div class="TsTitle">Sorted tickets:</div>';
-	button = '<button id="'+this.buttonDesc+'">Get description.</button>';
-	tickets = '<div id="'+this.sorted+'"></div>';
-	DCC('body').append(
-		'<div class="TsWrap">'+title+button+tickets+'</div>'
-	);
-
-	this.sorted = document.getElementById(this.sorted);
-	this.buttonDesc = document.getElementById(this.buttonDesc);
-
-	title = '<div class="TsTitle">Description of tickets:</div>';
-	tickets = '<div id="'+this.desc+'"></div>';
-	DCC('body').append(
-		'<div class="TsWrap">'+title+tickets+'</div>'
-	);
-
-	this.desc = document.getElementById(this.desc);
+	// title = '<div class="TsTitle">Description of tickets:</div>';
+	// tickets = '<div id="'+this.desc+'"></div>';
+	// DCC('body').append(
+	// 	'<div class="TsWrap">'+title+tickets+'</div>'
+	// );
 
 	return this;
 }
@@ -272,43 +371,43 @@ Tickets.prototype.append = function(ticket) {
 	return this;
 }
 
-Tickets.prototype.sortHTML = function() {
-	var tickets = DCC(this.tickets),
-		sorted = DCC(this.sorted),
-		child = tickets.firstChild();
+// Tickets.prototype.sortHTML = function() {
+// 	var tickets = DCC(this.tickets),
+// 		sorted = DCC(this.sorted),
+// 		child = tickets.firstChild();
 
-	if (child[0] == undefined) {
-		return this;
-	}
+// 	if (child[0] == undefined) {
+// 		return this;
+// 	}
 
-	sorted.append(child.copy(true)[0]);
-	child.remove();
+// 	sorted.append(child.copy(true)[0]);
+// 	child.remove();
 
-	child = tickets.firstChild();
-	while (tickets.firstChild()[0] != undefined) {
-		var fs = sorted.firstChild(),
-			ls = sorted.lastChild(),
-			fromSort = fs.find('.from').attr('val'),
-			toSort = ls.find('.to').attr('val'),
-			from = child.find('.from').attr('val'),
-			to = child.find('.to').attr('val'),
-			next = child.next();
+// 	child = tickets.firstChild();
+// 	while (tickets.firstChild()[0] != undefined) {
+// 		var fs = sorted.firstChild(),
+// 			ls = sorted.lastChild(),
+// 			fromSort = fs.find('.from').attr('val'),
+// 			toSort = ls.find('.to').attr('val'),
+// 			from = child.find('.from').attr('val'),
+// 			to = child.find('.to').attr('val'),
+// 			next = child.next();
 
-		if (toSort == from) {
-			ls.insertAfter(child.copy(true)[0]);
-			child.remove();
-		}
+// 		if (toSort == from) {
+// 			ls.insertAfter(child.copy(true)[0]);
+// 			child.remove();
+// 		}
 
-		if (fromSort == to) {
-			fs.insertBefore(child.copy(true)[0]);
-			child.remove();
-		}
+// 		if (fromSort == to) {
+// 			fs.insertBefore(child.copy(true)[0]);
+// 			child.remove();
+// 		}
 
-		child = (next[0] == undefined)? tickets.firstChild() : next;
-	}
+// 		child = (next[0] == undefined)? tickets.firstChild() : next;
+// 	}
 
-	return this;
-}
+// 	return this;
+// }
 
 function Ticket(vehicle, options, next, previous) {
 	// this.way = way;
@@ -341,7 +440,7 @@ Ticket.prototype.getHtml = function() {
 // Vehicles class
 function Vehicle(params) {
 	this.type = 'Vehicle';
-	this.kinds = ['Bus', 'Airplane', 'Train'];
+	this.kinds = ['Bus', 'Airplane', 'Train', 'Test'];
 
 	this.deep = 0;
 
@@ -472,3 +571,12 @@ function VehicleTrainLongdistance(params) {
 	]);
 }
 VehicleTrainLongdistance.prototype =  Object.create(VehicleTrain.prototype);
+
+function VehicleTest(params) {
+	Vehicle.apply(this, arguments);
+
+	this.kinds = [];
+	this.type = 'Test';
+	this.deep++;
+}
+VehicleTest.prototype = Object.create(Vehicle.prototype);
