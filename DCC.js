@@ -179,15 +179,16 @@
     }
 
     DCC.prototype.insertBefore = function(elem) {
+        elem = elem instanceof HTMLElement ? elem : createNode(elem);
         return this.each(function(){
-            // console.log(DCC(this).parent()[0].insertBefore(createNode(elem), this));
-            DCC(this).parent()[0].insertBefore(createNode(elem), this);
+            DCC(this).parent()[0].insertBefore(elem, this);
         });
     }
 
     DCC.prototype.insertAfter = function(elem) {
+        elem = elem instanceof HTMLElement ? elem : createNode(elem);
         return this.each(function() {
-            DCC(this).parent()[0].insertBefore(createNode(elem), DCC(this).next()[0])
+            DCC(this).parent()[0].insertBefore(elem, DCC(this).next()[0])
         })
     }
 
