@@ -15,12 +15,12 @@ TicketApi.newTID = function() {
 }
 
 TicketApi.TsID = 0;
-TicketApi.initApi = function() {
+TicketApi.init = function() {
 	var tickets = new Tickets(this.TsID++),
 		form = this.getForm(tickets);
 
 	form.render().init();
-	tickets.render();
+	tickets.render().init();
 
 	return form;
 }
@@ -215,18 +215,49 @@ function Tickets(id) {
 
 	this.tickets = 'Ts'+this.id;
 	this.button = 'TsB'+this.id;
+
+	this.sorted = 'TsS'+this.id;
+	this.buttonDesc = 'TsBD'+this.id;
+
+	this.desc = 'TsD'+this.id;
+}
+
+Tickets.prototype.init = function() {
+	var bs = DCC(this.button),
+		$this = this;
+	bs.on('click', function(event){
+		$this.sortHTML(event);
+	});
 }
 
 Tickets.prototype.render = function() {
-	var title = '<div class="TsTitle">Unsort tickets:</div>',
+	var title = '<div class="TsTitle">Unsorted tickets:</div>',
 		button = '<button id="'+this.button+'">Sort it.</button>',
 		tickets = '<div id="'+this.tickets+'"></div>';
 	DCC('body').append(
-		'<div class="TsWrap">'+title+tickets+'</div>'
+		'<div class="TsWrap">'+title+button+tickets+'</div>'
 	);
 
 	this.tickets = document.getElementById(this.tickets);
 	this.button = document.getElementById(this.button);
+
+	title = '<div class="TsTitle">Sorted tickets:</div>';
+	button = '<button id="'+this.buttonDesc+'">Get description.</button>';
+	tickets = '<div id="'+this.sorted+'"></div>';
+	DCC('body').append(
+		'<div class="TsWrap">'+title+button+tickets+'</div>'
+	);
+
+	this.sorted = document.getElementById(this.sorted);
+	this.buttonDesc = document.getElementById(this.buttonDesc);
+
+	title = '<div class="TsTitle">Description of tickets:</div>';
+	tickets = '<div id="'+this.desc+'"></div>';
+	DCC('body').append(
+		'<div class="TsWrap">'+title+tickets+'</div>'
+	);
+
+	this.desc = document.getElementById(this.desc);
 
 	return this;
 }
@@ -236,6 +267,44 @@ Tickets.prototype.append = function(ticket) {
 
 	if (ticket instanceof Ticket){
 		tickets.append(ticket.getHtml());
+	}
+
+	return this;
+}
+
+Tickets.prototype.sortHTML = function() {
+	var tickets = DCC(this.tickets),
+		sorted = DCC(this.sorted),
+		child = tickets.firstChild();
+
+	if (child[0] == undefined) {
+		return this;
+	}
+
+	sorted.append(child.copy(true)[0]);
+	child.remove();
+
+	child = tickets.firstChild();
+	while (tickets.firstChild()[0] != undefined) {
+		var fs = sorted.firstChild(),
+			ls = sorted.lastChild(),
+			fromSort = fs.find('.from').attr('val'),
+			toSort = ls.find('.to').attr('val'),
+			from = child.find('.from').attr('val'),
+			to = child.find('.to').attr('val'),
+			next = child.next();
+
+		if (toSort == from) {
+			ls.insertAfter(child.copy(true)[0]);
+			child.remove();
+		}
+
+		if (fromSort == to) {
+			fs.insertBefore(child.copy(true)[0]);
+			child.remove();
+		}
+
+		child = (next[0] == undefined)? tickets.firstChild() : next;
 	}
 
 	return this;
@@ -259,7 +328,9 @@ Ticket.prototype.getHtml = function() {
 
 	for (var key in this.options) {
 		var val = this.options[key];
-		options += '<div class="options '+key+'" name="'+key+'" val="'+val+'">'+key+':'+val+'</div>';
+		if (key != 'from' && key != 'to'){
+			options += '<div class="option '+key+'" name="'+key+'" val="'+val+'">'+key+':'+val+'</div>';
+		}
 	}
 	options += '</div>';
 
