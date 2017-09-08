@@ -30,6 +30,10 @@ TicketsSortApi.prototype.init = function() {
 		$this.sortDOM(event)
 	});
 
+	DCC(this.bD).on('click', function(event) {
+		$this.getDesc(event);
+	});
+
 	return this;
 }
 
@@ -94,6 +98,23 @@ TicketsSortApi.prototype.sortDOM = function() {
 	}
 	return this;
 }
+
+TicketsSortApi.prototype.getDesc = function(event) {
+	var sorted = DCC(this.sorted);
+
+	sorted.find('.TW').each(function(){
+		var $this = DCC(this),
+			options = $this.find('.option'),
+			vehicle = $this.find('.options').attr('vehicle');
+			params = {};
+		options.each(function() {
+			var $this = DCC(this);
+			params = Object.assign(params, {
+				$this.attr('name'): $this.attr('val')
+			});
+		});
+	});
+} 
 
 // -------------------------------------------------------- 
 // Control ticket
@@ -257,7 +278,6 @@ TicketForm.prototype.getSelectHTML = function(options, params) {
 	for (var key in params) {
 		html += ' '+key+'="'+params[key]+'"';
 	}
-	// html += '>';
 	html += '><option value="">Type...</option>';
 
 	options.forEach(function(val, ind, options){
@@ -352,13 +372,13 @@ function Ticket(vehicle, options, next, previous) {
 }
 
 Ticket.prototype.getHtml = function() {
-	var options = '<div class="options" vehicle="'+this.vehicle+'">';
+	var options = '<div class="options">';
 
 	for (var key in this.options) {
 		var val = this.options[key];
 			options += '<div class="option '+key+'" name="'+key+'" val="'+val+'">'+key+':'+val+'</div>';
 	}
-	options += '</div>';
+	options += '<div class="option vehicle" name="vehicle" val="'+this.vehicle+'"></div>';
 
 	return '<div class="TW">'+options+'</div>';
 }
@@ -393,7 +413,7 @@ function VehicleBus(params) {
 		'seat'
 	]);
 
-	this.default = {}.assign(this.default, {
+	this.default = Object.assign(this.default, {
 		seat: 'No seat assignment.'
 	})
 }
@@ -414,6 +434,14 @@ function VehicleBusRegular(params) {
 	this.kinds = [];
 	this.type = 'Regular';
 	this.deep++;
+
+	this.options = this.options.concat([
+		'route'
+	]);
+
+	this.default = Object.assign(this.default, {
+		route: 'Route № .'
+	})
 }
 VehicleBusRegular.prototype =  Object.create(VehicleBus.prototype);
 
@@ -429,9 +457,9 @@ function VehicleAirplane(params) {
 		'seat', 'baggage', 'gate'
 	]);
 
-	this.default = {
+	this.default = Object.assign(this.default, {
 		seat: 'Seat № .', baggage: 'The maximum load weight is 30 kg.', gate: 'Gate № .'
-	}
+	})
 }
 VehicleAirplane.prototype =  Object.create(Vehicle.prototype);
 
@@ -441,6 +469,14 @@ function VehicleAirplaneRegular(params) {
 	this.kinds = [];
 	this.type = 'Regular';
 	this.deep++;
+
+	this.options = this.options.concat([
+		'flight'
+	]);
+
+	this.default = Object.assign(this.default, {
+		flight : 'Flight № .'
+	})
 }
 VehicleAirplaneRegular.prototype =  Object.create(VehicleAirplane.prototype);
 
@@ -453,8 +489,12 @@ function VehicleTrain(params) {
 	this.deep++;
 
 	this.options = this.options.concat([
-		'seat'
+		'platform'
 	]);
+
+	this.default = Object.assign(this.default, {
+		platform : 'The train arrives at platform № .'
+	})
 }
 VehicleTrain.prototype =  Object.create(Vehicle.prototype);
 
@@ -502,8 +542,12 @@ function VehicleTrainLongdistance(params) {
 	this.deep++;
 
 	this.options = this.options.concat([
-		'wagon', 'class'
+		'seat', 'wagon', 'type'
 	]);
+
+	this.default = Object.assign(this.default, {
+		seat: 'Seat № .', wagon: 'Wagon № .', type: 'Type wagon is сoupe.'
+	})
 }
 VehicleTrainLongdistance.prototype =  Object.create(VehicleTrain.prototype);
 
