@@ -1,3 +1,7 @@
+.TOff {
+	display: none;
+}
+
 .TW {
 	background: powderblue;
 	overflow: auto;
@@ -8,6 +12,7 @@
 .TW .option, .TW .to, .TW .from, .TFOptions div {
 	float: left;
 	margin: 0 3px;
+	padding: 4px;
 }
 
 .TW div {
@@ -15,9 +20,32 @@
 }
 
 .TsTitle {
-	background: silver;
+	background: gold;
 }
 
-.TOff {
-	display: none;
+
+.TSATitle {
+	background: greenyellow;
+}
+
+.TsTitle, .TSATitle {
+	padding: 0 0 0 20px;
+	font-size: 20px;
+}
+
+.TFFrom, .TFTo, .TFType, .TFOption, .TFButton {
+	width: 70px;
+}
+
+.TFWay, .TFTypes, .TFOptions, .TFButton {
+	float : left;
+}
+
+.TF {
+	overflow: auto;
+}
+
+#TSABD, #TSABS {
+	width: 50%;
+	margin-top: 5px;
 }

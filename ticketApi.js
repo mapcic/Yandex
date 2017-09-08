@@ -45,18 +45,19 @@ TicketsSortApi.prototype.sortDOM = function() {
 	var tickets = DCC(this.tickets.tickets),
 		child = tickets.firstChild(),
 		next = child.next(),
-		list = DCC(this.newSortedList().sorted).lastChild();
+		list = DCC(this.sorted);
 
 	if (child[0] == undefined) {
 		return this;
 	}
 
+	tickets.getChilds().removeClass('TSASorted');
+	list.getChilds().remove();
 	list.append(child.copy(true)[0]);
-	child.addClass('TSASorted').addClass('TOff');
+	child.addClass('TSASorted');
 
 	var flag = true,
-		wasAdd = false,
-		i = 0;
+		wasAdd = false;
 	while (flag) {
 		var next = child.next();
 
@@ -70,13 +71,13 @@ TicketsSortApi.prototype.sortDOM = function() {
 
 			if (toSort == from && !child.hasClass('TSASorted')) {
 				ls.insertAfter(child.copy(true)[0]);
-				child.addClass('TSASorted').addClass('TOff');
+				child.addClass('TSASorted');
 				wasAdd = true;
 			}
 
 			if (fromSort == to && !child.hasClass('TSASorted')) {
 				fs.insertBefore(child.copy(true)[0]);
-				child.addClass('TSASorted').addClass('TOff');
+				child.addClass('TSASorted');
 				wasAdd = true;
 			}
 		}
@@ -90,7 +91,6 @@ TicketsSortApi.prototype.sortDOM = function() {
 		} else {
 			child = next;
 		}
-		i++;
 	}
 	return this;
 }
@@ -153,7 +153,7 @@ TicketForm.prototype.render = function() {
 		way = '<div class="TFWay">'+from+to+'</div>',
 		types = '<div id="'+this.types+'" class="TFTypes"><span>By</span>'+select+'</div>',
 		options = '<div id="'+this.options+'" class="TFOptions"></div>',
-		button = '<button id="'+this.button+'" class="TFButton TOff">Добавить билет</button>',
+		button = '<button id="'+this.button+'" class="TFButton TOff">Add</button>',
 		form = '<div id="'+this.form+'" class="TF">'+
 			way + types + options + button + '</div>';
 
@@ -276,8 +276,10 @@ TicketForm.prototype.showOptions = function() {
 		options = vehicle.options;
 	
 	for (var i = 0; i < options.length; i++) {
-		var html = '<div>'+options[i].charAt(0).toUpperCase() + options[i].slice(1)+':<input type="text" class="TFOption" name="'+options[i]+'"></div>';
-		optionsWrap.append(html);
+		if (options[i] != 'from' && options[i] != 'to') {
+			var html = '<div>'+options[i].charAt(0).toUpperCase() + options[i].slice(1)+':<input type="text" class="TFOption" name="'+options[i]+'"></div>';
+			optionsWrap.append(html);
+		}
 	}
 }
 
@@ -315,48 +317,18 @@ function Tickets(id) {
 	this.id = id;
 
 	this.tickets = 'Ts'+this.id;
-	this.button = 'TsB'+this.id;
-
-	this.sorted = 'TsS'+this.id;
-	this.buttonDesc = 'TsBD'+this.id;
-
-	this.desc = 'TsD'+this.id;
 }
 
 Tickets.prototype.init = function() {
 	this.tickets = document.getElementById(this.tickets);
-	this.button = document.getElementById(this.button);
-	// this.sorted = document.getElementById(this.sorted);
-	// this.buttonDesc = document.getElementById(this.buttonDesc);
-	// this.desc = document.getElementById(this.desc);
-
-	// var bs = DCC(this.button),
-	// 	$this = this;
-	// bs.on('click', function(event){
-	// 	$this.sortHTML(event);
-	// });
 }
 
 Tickets.prototype.render = function() {
 	var title = '<div class="TsTitle">Unsorted tickets:</div>',
-		button = '<button id="'+this.button+'">Sort it.</button>',
 		tickets = '<div id="'+this.tickets+'"></div>';
 	DCC('body').append(
-		'<div class="TsWrap">'+title+button+tickets+'</div>'
+		'<div class="TsWrap">'+title+tickets+'</div>'
 	);
-
-	// title = '<div class="TsTitle">Sorted tickets:</div>';
-	// button = '<button id="'+this.buttonDesc+'">Get description.</button>';
-	// tickets = '<div id="'+this.sorted+'"></div>';
-	// DCC('body').append(
-	// 	'<div class="TsWrap">'+title+button+tickets+'</div>'
-	// );
-
-	// title = '<div class="TsTitle">Description of tickets:</div>';
-	// tickets = '<div id="'+this.desc+'"></div>';
-	// DCC('body').append(
-	// 	'<div class="TsWrap">'+title+tickets+'</div>'
-	// );
 
 	return this;
 }
@@ -371,46 +343,7 @@ Tickets.prototype.append = function(ticket) {
 	return this;
 }
 
-// Tickets.prototype.sortHTML = function() {
-// 	var tickets = DCC(this.tickets),
-// 		sorted = DCC(this.sorted),
-// 		child = tickets.firstChild();
-
-// 	if (child[0] == undefined) {
-// 		return this;
-// 	}
-
-// 	sorted.append(child.copy(true)[0]);
-// 	child.remove();
-
-// 	child = tickets.firstChild();
-// 	while (tickets.firstChild()[0] != undefined) {
-// 		var fs = sorted.firstChild(),
-// 			ls = sorted.lastChild(),
-// 			fromSort = fs.find('.from').attr('val'),
-// 			toSort = ls.find('.to').attr('val'),
-// 			from = child.find('.from').attr('val'),
-// 			to = child.find('.to').attr('val'),
-// 			next = child.next();
-
-// 		if (toSort == from) {
-// 			ls.insertAfter(child.copy(true)[0]);
-// 			child.remove();
-// 		}
-
-// 		if (fromSort == to) {
-// 			fs.insertBefore(child.copy(true)[0]);
-// 			child.remove();
-// 		}
-
-// 		child = (next[0] == undefined)? tickets.firstChild() : next;
-// 	}
-
-// 	return this;
-// }
-
 function Ticket(vehicle, options, next, previous) {
-	// this.way = way;
 	this.vehicle = vehicle;
 	this.options = options;
 
@@ -419,21 +352,15 @@ function Ticket(vehicle, options, next, previous) {
 }
 
 Ticket.prototype.getHtml = function() {
-	var way = '<div class="way">'+
-			'<div class="from" val="'+this.options.from+'">FROM:'+this.options.from+'</div>'+
-			'<div class="to" val="'+this.options.to+'">TO:'+this.options.to+'</div>'+
-			'</div>',
-		options = '<div class="options" vehicle="'+this.vehicle+'">';
+	var options = '<div class="options" vehicle="'+this.vehicle+'">';
 
 	for (var key in this.options) {
 		var val = this.options[key];
-		if (key != 'from' && key != 'to'){
 			options += '<div class="option '+key+'" name="'+key+'" val="'+val+'">'+key+':'+val+'</div>';
-		}
 	}
 	options += '</div>';
 
-	return '<div class="TW">'+way+options+'</div>';
+	return '<div class="TW">'+options+'</div>';
 }
 
 // -------------------------------------------------------- 
@@ -444,8 +371,8 @@ function Vehicle(params) {
 
 	this.deep = 0;
 
-	this.way = ['from', 'to'];
-	this.options = [];
+	this.options = ['from', 'to'];
+	this.default = {from: 'A', to: 'B'};
 
 	this.params = (params instanceof Object)? params: {};
 }
@@ -463,8 +390,12 @@ function VehicleBus(params) {
 	this.deep++;
 
 	this.options = this.options.concat([
-		'seat', 'baggage'
+		'seat'
 	]);
+
+	this.default = {}.assign(this.default, {
+		seat: 'No seat assignment.'
+	})
 }
 VehicleBus.prototype = Object.create(Vehicle.prototype);
 
@@ -497,6 +428,10 @@ function VehicleAirplane(params) {
 	this.options = this.options.concat([
 		'seat', 'baggage', 'gate'
 	]);
+
+	this.default = {
+		seat: 'Seat № .', baggage: 'The maximum load weight is 30 kg.', gate: 'Gate № .'
+	}
 }
 VehicleAirplane.prototype =  Object.create(Vehicle.prototype);
 
