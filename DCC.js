@@ -208,21 +208,21 @@
                 }
     		});
 
-    		return (values.length > 1)? values : values[0];
-    	}
+            return (values.length > 1)? values : values[0];
+        }
     }
 
     DCC.prototype.attr = function(attr, val) {
-    	if (typeof val !== 'undefined') {
-    		return this.each(function(){
-    			this.setAttribute(attr, val);
-    		});
-    	} else {
-    		var values = [];
-    		this.each(function(){
-    			values = values.concat(this.getAttribute(attr));
-    		});
-    		return values;
+        if (typeof val !== 'undefined') {
+            return this.each(function(){
+                this.setAttribute(attr, val);
+            });
+        } else {
+            var values = [];
+            this.each(function(){
+                values = values.concat(this.getAttribute(attr));
+            });
+    		return (values.length > 1)? values : values[0];
     	}
     }
 
