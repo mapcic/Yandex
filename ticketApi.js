@@ -105,15 +105,20 @@ TicketsSortApi.prototype.getDesc = function(event) {
 	sorted.find('.TW').each(function(){
 		var $this = DCC(this),
 			options = $this.find('.option'),
-			vehicle = $this.find('.options').attr('vehicle');
 			params = {};
 		options.each(function() {
 			var $this = DCC(this);
-			params = Object.assign(params, {
-				$this.attr('name'): $this.attr('val')
-			});
+			params[$this.attr('name')] = $this.attr('val');
 		});
+
+		var vehicle = new window[params.vehicle](params),
+			desc = vehicle.desc;
+		console.log(params);
+		$this.append('<div class="desc">'+desc+'</div>');
+		$this.find('.options').addClass('TOff');
 	});
+
+	return this;
 } 
 
 // -------------------------------------------------------- 
@@ -299,6 +304,7 @@ TicketForm.prototype.showOptions = function() {
 		if (options[i] != 'from' && options[i] != 'to') {
 			var html = '<div>'+options[i].charAt(0).toUpperCase() + options[i].slice(1)+':<input type="text" class="TFOption" name="'+options[i]+'"></div>';
 			optionsWrap.append(html);
+			optionsWrap.lastChild().find('input').val(vehicle.default[options[i]]);
 		}
 	}
 }
@@ -378,7 +384,7 @@ Ticket.prototype.getHtml = function() {
 		var val = this.options[key];
 			options += '<div class="option '+key+'" name="'+key+'" val="'+val+'">'+key+':'+val+'</div>';
 	}
-	options += '<div class="option vehicle" name="vehicle" val="'+this.vehicle+'"></div>';
+	options += '<div class="option vehicle" name="vehicle" val="'+this.vehicle+'"></div></div>';
 
 	return '<div class="TW">'+options+'</div>';
 }
@@ -425,6 +431,8 @@ function VehicleBusAirexpess(params) {
 	this.kinds = [];
 	this.type = 'Airexpess';
 	this.deep++;
+
+	this.desc = 'Take the airport bus from '+this.params.from+' to '+this.params.to+'. '+this.params.seat;
 }
 VehicleBusAirexpess.prototype = Object.create(VehicleBus.prototype);
 
@@ -440,8 +448,11 @@ function VehicleBusRegular(params) {
 	]);
 
 	this.default = Object.assign(this.default, {
-		route: 'Route № .'
+		route: '№ .'
 	})
+
+	this.desc = 'Take the bus'+this.params.route+' from '+this.params.from+' to '+this.params.to+'. '+this.params.seat;
+
 }
 VehicleBusRegular.prototype =  Object.create(VehicleBus.prototype);
 
@@ -475,8 +486,10 @@ function VehicleAirplaneRegular(params) {
 	]);
 
 	this.default = Object.assign(this.default, {
-		flight : 'Flight № .'
+		flight : '№ .'
 	})
+
+	this.desc = 'From '+this.params.from+' Airport, take flight '+this.params.flight+' to '+this.params.to+'. '+this.params.gate+' '+this.params.seat+' '+this.params.baggage;
 }
 VehicleAirplaneRegular.prototype =  Object.create(VehicleAirplane.prototype);
 
@@ -513,6 +526,8 @@ function VehicleTrainRegularComfort(params) {
 	this.kinds = [];
 	this.type = 'Comfort';
 	this.deep++;
+
+	this.desc = 'Take train from '+this.params.from+' to '+this.params.to+'. '+this.params.platform;
 }
 VehicleTrainRegularComfort.prototype =  Object.create(VehicleTrainRegular.prototype);
 
@@ -522,6 +537,8 @@ function VehicleTrainRegularUsually(params) {
 	this.kinds = [];
 	this.type = 'Usually';
 	this.deep++;
+
+	this.desc = 'Take comfort train from '+this.params.from+' to '+this.params.to+'. '+this.params.platform;
 }
 VehicleTrainRegularUsually.prototype =  Object.create(VehicleTrainRegular.prototype);
 
@@ -531,6 +548,8 @@ function VehicleTrainAirexpess(params) {
 	this.kinds = [];
 	this.type = 'Airexpess';
 	this.deep++;
+
+	this.desc = 'Take aeroexpress from '+this.params.from+' Airport to '+this.params.to+'. '+this.params.platform;
 }
 VehicleTrainAirexpess.prototype =  Object.create(VehicleTrain.prototype);
 
@@ -548,6 +567,8 @@ function VehicleTrainLongdistance(params) {
 	this.default = Object.assign(this.default, {
 		seat: 'Seat № .', wagon: 'Wagon № .', type: 'Type wagon is сoupe.'
 	})
+
+	this.desc = 'Take train from '+this.params.from+' to '+this.params.to+'. '+this.params.platform+' '+this.params.seat+' '+this.params.wagon+' '+this.params.type;
 }
 VehicleTrainLongdistance.prototype =  Object.create(VehicleTrain.prototype);
 
@@ -557,5 +578,7 @@ function VehicleTest(params) {
 	this.kinds = [];
 	this.type = 'Test';
 	this.deep++;
+
+	this.desc = 'Take test from '+this.params.from+' to '+this.params.to+'.';
 }
 VehicleTest.prototype = Object.create(Vehicle.prototype);
