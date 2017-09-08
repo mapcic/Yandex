@@ -1,0 +1,23 @@
+.TW {
+	background: powderblue;
+	overflow: auto;
+	padding: 4px 0;
+	margin: 4px 0;
+}
+
+.TW .option, .TW .to, .TW .from, .TFOptions div {
+	float: left;
+	margin: 0 3px;
+}
+
+.TW div {
+	background: burlywood;
+}
+
+.TsTitle {
+	background: silver;
+}
+
+.TOff {
+	display: none;
+}
