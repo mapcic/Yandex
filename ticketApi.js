@@ -1,5 +1,10 @@
-// How document
-
+/**
+ * Создает экземпляр класса TicketsSortApi
+ *
+ * @param {Tickets} tickets - коллекция билетов
+ * @this {TicketsSortApi}
+ * @constructor
+ */
 function TicketsSortApi(tickets) {
 	this.tickets = (tickets instanceof Tickets)? tickets : TicketApi.TicketsFromHtml(TicketApi.TsID-1);
 	this.api = 'TSA';
@@ -8,6 +13,12 @@ function TicketsSortApi(tickets) {
 	this.sorted = 'TSAS';
 }
 
+/**
+ * Печатает html представление, состоящие из обертки для отсортированных билетов и кнопок.
+ *
+ * @this {TicketsSortApi}
+ * @return {TicketsSortApi}
+ */
 TicketsSortApi.prototype.render = function() {
 	var title = '<div class="TSATitle">Sort tickets</div>',
 		bS = '<button id="'+this.bS+'">Get sort tickets</button>',
@@ -19,6 +30,13 @@ TicketsSortApi.prototype.render = function() {
 	return this;
 }
 
+/**
+ * Записывает DOM элементы в соответствующие свойства.
+ * Инициализирует события сортировки и словесного описания.
+ *
+ * @this {TicketsSortApi}
+ * @return {TicketsSortApi}
+ */
 TicketsSortApi.prototype.init = function() {
 	this.api = document.getElementById(this.api);
 	this.bS = document.getElementById(this.bS);
@@ -37,14 +55,15 @@ TicketsSortApi.prototype.init = function() {
 	return this;
 }
 
-TicketsSortApi.prototype.newSortedList = function() {
-	var html = '<div class="TSAS"></div>';
-
-	DCC(this.sorted).append(html);
-
-	return this;
-}
-
+/**
+ * Обработчик события. Сортировка билетов. Условие "с любым количеством карточек" 
+ * указывает на ограничение размеров переменных. Идея сортировки в хранении
+ * объектов в DOM представлении. Прохождении по ним в бесконечном цикле. Таким
+ * образом мы избавляемся от ограничения по памяти.
+ *
+ * @this {TicketsSortApi}
+ * @return {TicketsSortApi}
+ */
 TicketsSortApi.prototype.sortDOM = function() {
 	var tickets = DCC(this.tickets.tickets),
 		child = tickets.firstChild(),
@@ -99,6 +118,15 @@ TicketsSortApi.prototype.sortDOM = function() {
 	return this;
 }
 
+/**
+ * Обработчик события. Формирует словесное описание билета исходя из
+ * записанных в него параметров. Так же, как и sortHtml нет ограничения
+ * по памяти, так как шагаем по DOM элементам.
+ *
+ * @param {Event} event -- событие
+ * @this {TicketsSortApi}
+ * @return {TicketsSortApi}
+ */
 TicketsSortApi.prototype.getDesc = function(event) {
 	var sorted = DCC(this.sorted);
 
@@ -121,10 +149,22 @@ TicketsSortApi.prototype.getDesc = function(event) {
 	return this;
 } 
 
-// -------------------------------------------------------- 
-// Control ticket
+/**
+ * Создает экземпляр класса TicketApi. Отвечает за инициализацию всей программы.
+ *
+ * @this {TicketApi}
+ * @constructor
+ */
 function TicketApi() {}
 
+/**
+ * Статические свойства.
+ *
+ * @static {number} TFID - счетчик объектов формы для создания объектов
+ * @static {number} TsID - счетчик объектов оберток билетов
+ * @static {String} TFIDName - id DOM представления формы
+ * @static {String} TsIDName - id DOM представления обертки
+ */
 TicketApi.TFID = 0;
 TicketApi.TFIDName="TF"
 TicketApi.TsID = 0;
@@ -140,10 +180,28 @@ TicketApi.init = function() {
 	return form;
 }
 
+/**
+ * Возвращает экземпляр формы.
+ *
+ * @param {Tickets} tickets -- объект обертки билетов
+ * @this {TicketApi}
+ * @return {TicketForm}
+ *
+ * @static
+ */
 TicketApi.getForm = function(tickets) {
 	return new TicketForm(this.TFID++, tickets);
 }
 
+/**
+ * Возвращает экземпляр обертки билетов.
+ *
+ * @param {number} id -- id уже существующей обертки
+ * @this {TicketApi}
+ * @return {Tickets}
+ *
+ * @static
+ */
 TicketApi.TicketsFromHtml = function(id) {
 	var tickets = new Tickets(id);
 
@@ -152,8 +210,14 @@ TicketApi.TicketsFromHtml = function(id) {
 	return tickets;
 }
 
-// -------------------------------------------------------- 
-// Class to figure Ticket
+/**
+ * Создает экземпляр класса TicketForm. Отвечает за формирование билетов и входных данных.
+ *
+ * @param (number) id -- ID DOM представления формы
+ * @param (Tickets) tickets -- обеъект обертки билетов, для взаимодействия с формой.
+ * @this {TicketForm}
+ * @constructor
+ */
 function TicketForm(id, tickets) {
 	this.id = id;
 	this.tickets = tickets;
@@ -169,6 +233,12 @@ function TicketForm(id, tickets) {
 	this.vType = [];
 }
 
+/**
+ * Вывод HTML представления формы.
+ *
+ * @this {TicketForm}
+ * @return {TicketForm}
+ */
 TicketForm.prototype.render = function() {
 	var	vehicle = new Vehicle(),
 		select = this.getSelectHTML(
@@ -195,6 +265,13 @@ TicketForm.prototype.render = function() {
 	return this;
 }
 
+/**
+ * Добавляются события изменения полей формы, отвечающих за транспортное средство и
+ * добавления нового билета
+ *
+ * @this {TicketForm}
+ * @return {TicketForm}
+ */
 TicketForm.prototype.init = function() {
 	var $this = this,
 		select = DCC($this.form).find('select');
@@ -212,18 +289,37 @@ TicketForm.prototype.init = function() {
 	return this;
 }
 
+/**
+ * Делают кнопку добавления билета активной
+ *
+ * @this {TicketForm}
+ * @return {TicketForm}
+ */
 TicketForm.prototype.on = function() {
 	DCC(this.button).removeClass('TOff');
 
 	return this;
 }
 
+/**
+ * Делают кнопку добавления билета неактивной
+ *
+ * @this {TicketForm}
+ * @return {TicketForm}
+ */
 TicketForm.prototype.off = function() {
 	DCC(this.button).addClass('TOff');
 
 	return this;
 }
 
+/**
+ * Обработчик события изменения типа транспортного средства.
+ *
+ * @param {Event} event -- событие изменения формы
+ * @this {TicketForm}
+ * @return {void}
+ */
 TicketForm.prototype.onChange = function(event) {
 	var $this = DCC(event.currentTarget),
 		deep = $this.attr('deep'),
@@ -237,6 +333,12 @@ TicketForm.prototype.onChange = function(event) {
 	this.updateTypes();
 }
 
+/**
+ * Обновление полей типа транспортного средства.
+ *
+ * @this {TicketForm}
+ * @return {void}
+ */
 TicketForm.prototype.updateTypes = function() {
 	var formHTML = DCC(this.form),
 		typesWrap = DCC(this.types),
@@ -276,6 +378,14 @@ TicketForm.prototype.updateTypes = function() {
 	}
 }
 
+/**
+ * Обновление полей типа транспортного средства.
+ *
+ * @param {Array} options -- список параметров транспортного средства
+ * @param {Object} params -- пара ключ из options и значения для заполнения формы
+ * @this {TicketForm}
+ * @return {string}
+ */
 TicketForm.prototype.getSelectHTML = function(options, params) {
 	var html = '';
 
@@ -293,6 +403,13 @@ TicketForm.prototype.getSelectHTML = function(options, params) {
 	return html;
 }
 
+/**
+ * Вывод Html представления параметров транспортного средства.
+ * Запись значений по умолчанию.
+ *
+ * @this {TicketForm}
+ * @return {TicketForm}
+ */
 TicketForm.prototype.showOptions = function() {
 	var formHTML = DCC(this.form),
 		optionsWrap = DCC(this.options),
@@ -307,13 +424,29 @@ TicketForm.prototype.showOptions = function() {
 			optionsWrap.lastChild().find('input').val(vehicle.default[options[i]]);
 		}
 	}
+
+	return this;
 }
 
+/**
+ * Скрывает поле параметров транспортного средства.
+ *
+ * @this {TicketForm}
+ * @return {TicketForm}
+ */
 TicketForm.prototype.hideOptions = function() {
 	DCC(this.options).getChilds().remove();
 	return this;
 }
 
+/**
+ * Обработка события нажатия на кнопку. Добавление билета в обертку Tickets.
+ * Создание входных данных для алгоритма сортировки.
+ *
+ * @param {Event} event -- событие нажатия
+ * @this {TicketForm}
+ * @return {TicketForm}
+ */
 TicketForm.prototype.newTicket = function(event) {
 	var vehicle = 'Vehicle'+this.vType.join(''),
 		params = {
@@ -337,18 +470,36 @@ TicketForm.prototype.newTicket = function(event) {
 	return this;
 }
 
-// -------------------------------------------------------- 
-// Tickets Class
+/**
+ * Создает экземпляр класса Tickets. Обертка билетов -- входных данных.
+ *
+ * @this {Tickets}
+ * @constructor
+ */
 function Tickets(id) {
 	this.id = id;
 
 	this.tickets = 'Ts'+this.id;
 }
 
+/**
+ * Запись DOM представления.
+ *
+ * @this {Tickets}
+ * @return {Tickets}
+ */
 Tickets.prototype.init = function() {
 	this.tickets = document.getElementById(this.tickets);
+
+	return this;
 }
 
+/**
+ * Вывод Html предствления обертки.
+ *
+ * @this {Tickets}
+ * @return {Tickets}
+ */
 Tickets.prototype.render = function() {
 	var title = '<div class="TsTitle">Unsorted tickets:</div>',
 		tickets = '<div id="'+this.tickets+'"></div>';
@@ -359,6 +510,13 @@ Tickets.prototype.render = function() {
 	return this;
 }
 
+/**
+ * Добавляет HTML объект входных данных;
+ *
+ * @param {Ticket} ticket -- объект билета -- входных данных;
+ * @this {Tickets}
+ * @return {Tickets}
+ */
 Tickets.prototype.append = function(ticket) {
 	var tickets = DCC(this.tickets);
 
@@ -369,6 +527,17 @@ Tickets.prototype.append = function(ticket) {
 	return this;
 }
 
+/**
+ * Создает экземпляр класса Ticket. Обертка входных данных.
+ *
+ * @param {String} vehicle -- имя класса транспортного средсва
+ * @param {Object} options -- пары ключ -- значение для формирования 
+ * объекта траспротного средства
+ * @param {Ticket} next -- следующий билет
+ * @param {Ticket} previous -- предыдущий билет
+ * @this {Ticket}
+ * @constructor
+ */
 function Ticket(vehicle, options, next, previous) {
 	this.vehicle = vehicle;
 	this.options = options;
@@ -377,6 +546,13 @@ function Ticket(vehicle, options, next, previous) {
 	this.previous = (previous instanceof Ticket)? previous : undefined;
 }
 
+/**
+ * Добавляет HTML объект входных данных;
+ *
+ * @param {Ticket} ticket -- объект билета -- входных данных;
+ * @this {Tickets}
+ * @return {String}
+ */
 Ticket.prototype.getHtml = function() {
 	var options = '<div class="options">';
 
@@ -389,11 +565,16 @@ Ticket.prototype.getHtml = function() {
 	return '<div class="TW">'+options+'</div>';
 }
 
-// -------------------------------------------------------- 
-// Vehicles class
+/**
+ * Создает экземпляр класса Vehicle. Описывает основные виды транспортных средств
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {Vehicle}
+ * @constructor
+ */
 function Vehicle(params) {
 	this.type = 'Vehicle';
-	this.kinds = ['Bus', 'Airplane', 'Train', 'Test'];
+	this.kinds = ['Bus', 'Airplane', 'Train'];
 
 	this.deep = 0;
 
@@ -407,7 +588,13 @@ Vehicle.prototype.hasKinds = function() {
 	return this.kinds.length > 0;
 }
 
-// Bus tree
+/**
+ * Создает экземпляр класса VehicleBus. Описывает основные виды автобусов.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleBus}
+ * @constructor
+ */
 function VehicleBus(params) {
 	Vehicle.apply(this, arguments);
 
@@ -425,6 +612,13 @@ function VehicleBus(params) {
 }
 VehicleBus.prototype = Object.create(Vehicle.prototype);
 
+/**
+ * Создает экземпляр класса VehicleBusAirexpess. Описывает автобус из аэропорта.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleBusAirexpess}
+ * @constructor
+ */
 function VehicleBusAirexpess(params) {
 	VehicleBus.apply(this, arguments);
 
@@ -436,6 +630,13 @@ function VehicleBusAirexpess(params) {
 }
 VehicleBusAirexpess.prototype = Object.create(VehicleBus.prototype);
 
+/**
+ * Создает экземпляр класса VehicleBusRegular. Описывает рйсовый автобус.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleBusRegular}
+ * @constructor
+ */
 function VehicleBusRegular(params) {
 	VehicleBus.apply(this, arguments);
 
@@ -448,7 +649,7 @@ function VehicleBusRegular(params) {
 	]);
 
 	this.default = Object.assign(this.default, {
-		route: '№ .'
+		route: '№'
 	})
 
 	this.desc = 'Take the bus'+this.params.route+' from '+this.params.from+' to '+this.params.to+'. '+this.params.seat;
@@ -456,7 +657,13 @@ function VehicleBusRegular(params) {
 }
 VehicleBusRegular.prototype =  Object.create(VehicleBus.prototype);
 
-// Airplane tree
+/**
+ * Создает экземпляр класса VehicleAirplane. Описывает основные виды самолетов.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleAirplane}
+ * @constructor
+ */
 function VehicleAirplane(params) {
 	Vehicle.apply(this, arguments);
 
@@ -474,8 +681,15 @@ function VehicleAirplane(params) {
 }
 VehicleAirplane.prototype =  Object.create(Vehicle.prototype);
 
+/**
+ * Создает экземпляр класса VehicleAirplaneRegular. Описывает рейсовый самолет.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleAirplaneRegular}
+ * @constructor
+ */
 function VehicleAirplaneRegular(params) {
-	VehicleAirplane.apply(this, arguments);
+	VehicleAirplaneRegular.apply(this, arguments);
 
 	this.kinds = [];
 	this.type = 'Regular';
@@ -486,14 +700,20 @@ function VehicleAirplaneRegular(params) {
 	]);
 
 	this.default = Object.assign(this.default, {
-		flight : '№ .'
+		flight : '№'
 	})
 
 	this.desc = 'From '+this.params.from+' Airport, take flight '+this.params.flight+' to '+this.params.to+'. '+this.params.gate+' '+this.params.seat+' '+this.params.baggage;
 }
 VehicleAirplaneRegular.prototype =  Object.create(VehicleAirplane.prototype);
 
-// Train tree
+/**
+ * Создает экземпляр класса VehicleTrain. Описывает основные виды поездов.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleTrain}
+ * @constructor
+ */
 function VehicleTrain(params) {
 	Vehicle.apply(this, arguments);
 
@@ -511,6 +731,13 @@ function VehicleTrain(params) {
 }
 VehicleTrain.prototype =  Object.create(Vehicle.prototype);
 
+/**
+ * Создает экземпляр класса VehicleTrainRegular. Описывает основные виды рейсовых поездов.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleTrainRegular}
+ * @constructor
+ */
 function VehicleTrainRegular(params) {
 	VehicleTrain.apply(this, arguments);
 
@@ -520,6 +747,13 @@ function VehicleTrainRegular(params) {
 }
 VehicleTrainRegular.prototype =  Object.create(VehicleTrain.prototype);
 
+/**
+ * Создает экземпляр класса VehicleTrainRegularComfort. Описывает рейсовые поезда повышенной комфортности.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleTrainRegularComfort}
+ * @constructor
+ */
 function VehicleTrainRegularComfort(params) {
 	VehicleTrainRegular.apply(this, arguments);
 
@@ -531,6 +765,13 @@ function VehicleTrainRegularComfort(params) {
 }
 VehicleTrainRegularComfort.prototype =  Object.create(VehicleTrainRegular.prototype);
 
+/**
+ * Создает экземпляр класса VehicleTrainRegularUsually. Описывает рейсовые поезда.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleTrainRegularUsually}
+ * @constructor
+ */
 function VehicleTrainRegularUsually(params) {
 	VehicleTrainRegular.apply(this, arguments);
 
@@ -542,6 +783,13 @@ function VehicleTrainRegularUsually(params) {
 }
 VehicleTrainRegularUsually.prototype =  Object.create(VehicleTrainRegular.prototype);
 
+/**
+ * Создает экземпляр класса VehicleTrainAirexpess. Описывает аэроэкспресс.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleTrainAirexpess}
+ * @constructor
+ */
 function VehicleTrainAirexpess(params) {
 	VehicleTrain.apply(this, arguments);
 
@@ -553,6 +801,13 @@ function VehicleTrainAirexpess(params) {
 }
 VehicleTrainAirexpess.prototype =  Object.create(VehicleTrain.prototype);
 
+/**
+ * Создает экземпляр класса VehicleTrainLongdistance. Описывает поезд дальнего следования.
+ *
+ * @param (Object) params -- объект значений параметров транспортного средств.
+ * @this {VehicleTrainLongdistance}
+ * @constructor
+ */
 function VehicleTrainLongdistance(params) {
 	VehicleTrain.apply(this, arguments);
 
@@ -571,14 +826,3 @@ function VehicleTrainLongdistance(params) {
 	this.desc = 'Take train from '+this.params.from+' to '+this.params.to+'. '+this.params.platform+' '+this.params.seat+' '+this.params.wagon+' '+this.params.type;
 }
 VehicleTrainLongdistance.prototype =  Object.create(VehicleTrain.prototype);
-
-function VehicleTest(params) {
-	Vehicle.apply(this, arguments);
-
-	this.kinds = [];
-	this.type = 'Test';
-	this.deep++;
-
-	this.desc = 'Take test from '+this.params.from+' to '+this.params.to+'.';
-}
-VehicleTest.prototype = Object.create(Vehicle.prototype);
