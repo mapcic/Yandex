@@ -689,7 +689,7 @@ VehicleAirplane.prototype =  Object.create(Vehicle.prototype);
  * @constructor
  */
 function VehicleAirplaneRegular(params) {
-	VehicleAirplaneRegular.apply(this, arguments);
+	VehicleAirplane.apply(this, arguments);
 
 	this.kinds = [];
 	this.type = 'Regular';

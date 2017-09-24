@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Тестовая страница TicketApi</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<!-- To work with CSS and DOM -->
+<script type="text/javascript" src="DCC.js"></script>
+<!-- To work with TicketApi -->
+<script type="text/javascript" src="ticketApi.js"></script>
+<script type="text/javascript">
+	// crearte form and sort objects.
+	var ticketForm = TicketApi.init(),
+		sortApi = new TicketsSortApi().render().init();
+</script>
+</body>
+</html>
